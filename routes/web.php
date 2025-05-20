@@ -26,6 +26,8 @@ use App\Http\Livewire\ResetPasswordExample;
 use App\Http\Livewire\UpgradeToPro;
 use App\Http\Livewire\Users;
 
+use App\Http\Controllers\BlacklistController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -68,4 +70,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/forms', Forms::class)->name('forms');
     Route::get('/modals', Modals::class)->name('modals');
     Route::get('/typography', Typography::class)->name('typography');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/blacklists', [BlacklistController::class, 'index'])->name('blacklists.index');
+    Route::get('/blacklists/create', [BlacklistController::class, 'create'])->name('blacklists.create');
+    Route::post('/blacklists', [BlacklistController::class, 'store'])->name('blacklists.store');
+    Route::post('/blacklists/{id}/unblock', [BlacklistController::class, 'unblock'])->name('blacklists.unblock');
+    Route::get('/blacklists/filter', [BlacklistController::class, 'filter'])->name('blacklists.filter');
+
 });

@@ -29,4 +29,5 @@
         {{ $slot }}
 
     @endif
+    @stack('scripts')
 </x-layouts.base>
