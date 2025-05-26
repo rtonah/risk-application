@@ -42,19 +42,19 @@
                     </span>
                 </td> --}}
                 <td class="p-2>
-                    @if ($bl->status == 1)
+                    @if ($bl->status == 'blacklisted')
                         <span class="text-danger">Blacklisted</span>
-                    @elseif ($bl->status == 2)
+                    @elseif ($bl->status == 'unblocked')
                         <span class="text-success">Unblocked</span>
                     @endif
                 </td>
                 
                 <td class="p-2">
-                    @if($bl->status === '1')
-                    <form action="{{ route('blacklists.unblock', $bl->id) }}" method="POST" onsubmit="return confirm('Unblock this client?')">
-                        @csrf
-                        <button class="btn btn-outline-danger">Unblock</button>
-                    </form>
+                    @if($bl->status == 'blacklisted')
+                        <form action="{{ route('blacklists.unblock', $bl->id) }}" method="POST" onsubmit="return confirm('Unblock this client?')">
+                            @csrf
+                            <button class="btn btn-outline-danger">Unblock</button>
+                        </form>
                     @else
                         <span class="text-gray-500 text-sm">Unblocked</span>
                     @endif

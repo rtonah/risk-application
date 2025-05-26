@@ -19,10 +19,10 @@ return new class extends Migration
             $table->enum('status', ['blacklisted', 'unblocked'])->default('blacklisted');
             $table->string('document_path')->nullable();
 
-            $table->unsignedBigInteger('unblocked_by')->nullable();
+            $table->unsignedInteger('unblocked_by')->nullable();
             $table->foreign('unblocked_by')->references('id')->on('users')->onDelete('set null');
 
-            $table->unsignedBigInteger('created_by');
+            $table->unsignedInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
 
 

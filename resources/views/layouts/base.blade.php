@@ -135,4 +135,33 @@
 
 </body>
 
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const notyf = new Notyf({
+                    position: {
+                        x: 'right',
+                        y: 'top',
+                    },
+                    duration: 4000
+                });
+                notyf.success("{{ session('success') }}");
+            });
+        </script>
+    @endif
+    @if (session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const notyf = new Notyf({
+                    position: {
+                        x: 'right',
+                        y: 'top',
+                    },
+                    duration: 4000
+                });
+                notyf.error("{{ session('error') }}");
+            });
+        </script>
+    @endif
+
 </html>

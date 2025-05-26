@@ -98,6 +98,8 @@
     
     <!-- Volt JS -->
     <script src="/assets/js/volt.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
 
     @if(env('IS_DEMO')) 
         <!-- Global site tag (gtag.js) - Google Analytics -->

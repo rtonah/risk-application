@@ -4,6 +4,7 @@ namespace App\Http\Livewire\Auth;
 
 use Livewire\Component;
 use App\Models\User;
+use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 

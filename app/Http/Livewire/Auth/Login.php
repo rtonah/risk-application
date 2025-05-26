@@ -29,17 +29,39 @@ class Login extends Component
         ]);
     }
 
+    // public function login()
+    // {
+    //     $credentials = $this->validate();
+    //     if (auth()->attempt(['email' => $this->email, 'password' => $this->password], $this->remember_me)) {
+    //         $user = User::where(['email' => $this->email])->first();
+    //         auth()->login($user, $this->remember_me);
+    //         return redirect()->intended('/dashboard');
+    //     } else {
+    //         return $this->addError('email', trans('auth.failed'));
+    //     }
+    // }
+
     public function login()
     {
         $credentials = $this->validate();
-        if (auth()->attempt(['email' => $this->email, 'password' => $this->password], $this->remember_me)) {
-            $user = User::where(['email' => $this->email])->first();
+
+        $user = User::where('email', $this->email)->first();
+
+        // Vérifie que l'utilisateur existe et que le mot de passe est correct
+        if ($user && \Hash::check($this->password, $user->password)) {
+            // Vérifie le statut
+            if ($user->status !== 1) {
+                return $this->addError('email', 'Votre compte est inactif. Veuillez contacter l\'administrateur.');
+            }
+
+            // Authentification réussie
             auth()->login($user, $this->remember_me);
             return redirect()->intended('/dashboard');
-        } else {
-            return $this->addError('email', trans('auth.failed'));
         }
+
+        return $this->addError('email', trans('auth.failed'));
     }
+
 
     public function render()
     {

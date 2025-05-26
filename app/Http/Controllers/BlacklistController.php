@@ -54,6 +54,7 @@ class BlacklistController extends Controller
 
         return redirect()->route('blacklists.index')->with('success', 'Client unblocked.');
     }
+    
     public function filter(Request $request)
     {
         $query = $request->input('query');
