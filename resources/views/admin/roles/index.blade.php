@@ -30,10 +30,6 @@
                 </svg>
                 New Role
             </a>
-            <div class="btn-group ms-2 ms-lg-3">
-                <button type="button" class="btn btn-sm btn-outline-gray-600">Share</button>
-                <button type="button" class="btn btn-sm btn-outline-gray-600">Export</button>
-            </div>
         </div>
     </div>
 

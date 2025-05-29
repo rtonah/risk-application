@@ -43,4 +43,20 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function purchaseRequests()
+    {
+        return $this->hasMany(PurchaseRequest::class);
+    }
+
+    public function supervisedRequests()
+    {
+        return $this->hasMany(PurchaseRequest::class, 'supervisor_id');
+    }
+
+    public function managedRequests()
+    {
+        return $this->hasMany(PurchaseRequest::class, 'purchase_manager_id');
+    }
+
 }

@@ -30,15 +30,20 @@ use App\Http\Controllers\BlacklistController;
 use App\Exports\BlacklistExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\Admin\UserRoleController;
-
+use App\Http\Controllers\Musoni\GraceController;
+use App\Http\Controllers\Musoni\SettingController;
+use App\Http\Controllers\Musoni\SalaryPaymentController;
+use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\Ticket\TicketController;
 use App\Http\Controllers\Ticket\MessageController;
 use App\Http\Controllers\Ticket\AttachmentController;
 use App\Http\Controllers\Ticket\Conformite\GestionController;
 use App\Http\Controllers\Ticket\Conformite\BaseConnaissanceController;
+use App\Http\Livewire\Purchase\MyPurchaseRequests;
 use Spatie\Permission\Models\Role;
 
-
+use App\Http\Livewire\Purchase\PurchaseRequestList;
+use App\Http\Livewire\Purchase\ReviewRequest;
 
 /*
 |--------------------------------------------------------------------------
@@ -65,6 +70,8 @@ Route::get('/404', Err404::class)->name('404');
 Route::get('/500', Err500::class)->name('500');
 Route::get('/upgrade-to-pro', UpgradeToPro::class)->name('upgrade-to-pro');
 
+
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', Profile::class)->name('profile');
     Route::get('/profile-example', ProfileExample::class)->name('profile-example');
@@ -83,8 +90,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/modals', Modals::class)->name('modals');
     Route::get('/typography', Typography::class)->name('typography');
 
-    Route::get('/admin/users/{user}/edit', [UserRoleController::class, 'edit'])->name('admin.users.edit');
-    Route::put('/admin/users/{user}/password', [UserRoleController::class, 'updatePassword'])->name('admin.pass.update');
+    
+
 
 });
 
@@ -93,10 +100,50 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/blacklists/create', [BlacklistController::class, 'create'])->name('blacklists.create');
     Route::post('/blacklists', [BlacklistController::class, 'store'])->name('blacklists.store');
     Route::get('/blacklists/filter', [BlacklistController::class, 'filter'])->name('blacklists.filter');
+    Route::get('/admin/users/{user}/edit', [UserRoleController::class, 'edit'])->name('admin.users.edit');
+    Route::put('/admin/users/{user}/password', [UserRoleController::class, 'updatePassword'])->name('admin.pass.update');
+    Route::get('/musoni_grace', [GraceController::class, 'index'])->name('grace.index');
+});
+
+#.. Purchage request
+// Route::middleware(['auth'])->group(function () {
+
+    // Route::post('/purchase-requests', [PurchaseRequestController::class, 'store'])->name('purchase-requests.store');
+    // Route::get('/purchase-requests', [PurchaseRequestController::class, 'index'])->name('purchase-requests.index');
+    // Route::get('/purchase-requests/review', [PurchaseRequestController::class, 'review'])->name('purchase-requests.review');
+    // Route::get('/purchase-requests/liste', [PurchaseRequestController::class, 'liste'])->name('purchase-requests.liste');
+
+//     Route::get('/purchase-requests', PurchaseRequestList::class)->name('purchase-requests.index');
+//     Route::get('/purchase-requests/{purchaseRequest}/review', ReviewRequest::class)->name('purchase-requests.review');
+
+// });
+Route::middleware(['auth'])->group(function () {
+    // Route::get('/purchase-requests', PurchaseRequestList::class)->name('purchase-requests.index');
+    Route::get('/purchase-requests', [PurchaseRequestController::class, 'index'])->name('purchase-requests.index');
+    Route::get('/purchase-requests/create', [PurchaseRequestController::class, 'create'])->name('purchase-requests.create');
+    
+    Route::get('/purchase-requests/{id}/review', function ($id) {
+        $purchaseRequest = \App\Models\PurchaseRequest::with('items', 'user')->findOrFail($id);
+        return view('purchase.review', compact('purchaseRequest'));
+    })->name('purchase-requests.review');
+
+    // Route::get('/purchase-requests/{purchaseRequest}/review', ReviewRequest::class)
+    // ->name('purchase-requests.review');
+
+    #.. Pour l'utilisateurs 
+
+    Route::get('/purchase-requests/mes-demandes', function () {
+        return view('purchase.my-request');
+    })->name('purchase-requests.mine');
+
+
 });
 
 Route::group(['middleware' => ['role:admin']], function () {
     Route::post('/blacklists/{id}/unblock', [BlacklistController::class, 'unblock'])->name('blacklists.unblock');
+    Route::get('/musoni/setting', [SettingController::class, 'index'])->name('setting.index');
+    Route::post('/musoni/setting', [SettingController::class, 'store'])->name('setting.store');
+
 });
 
 Route::get('/blacklist/export/excel', function () {
@@ -124,7 +171,15 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::post('/admin/store', [UserRoleController::class, 'store'])->name('users.store');
 
+    #.. Payement SALAIRE
+    Route::resource('salary-payments', SalaryPaymentController::class);
+    Route::post('/salary-payments/import', [SalaryPaymentController::class, 'import'])->name('salary-payments.import');
+    Route::get('/salary-payments/template', [SalaryPaymentController::class, 'downloadTemplate'])->name('salary-payments.template');
+    Route::post('/salary-payments/deposit', [SalaryPaymentController::class, 'deposit'])->name('salary-payments.deposit');
+    Route::get('/export', [SalaryPaymentController::class, 'export'])->name('salary-payments.export');
+
 });
+// Route::get('/test-export', [SalaryPaymentController::class, 'export']);
 
 Route::middleware(['auth'])->group(function () {
 

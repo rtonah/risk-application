@@ -21,6 +21,7 @@
         <meta  property="og:image" content="https://themesberg.s3.us-east-2.amazonaws.com/public/products/volt-laravel-dashboard/volt-free-laravel-dashboard.jpg"></meta>
         <meta  property="og:description" content="Volt Laravel Admin Dashboard features dozens of UI components and a Laravel backend with Livewire & Alpine.js"></meta>
         <meta  property="og:site_name" content="Themesberg"></meta>
+
     @endif
 
     <!-- Favicons -->
@@ -43,7 +44,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.1.4/dist/css/datepicker-bs4.min.css">
 
     <!-- Fontawesome -->
-    <link type="text/css" href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+    {{-- <link type="text/css" href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet"> --}}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
     
     <!-- Sweet Alert -->
     <link type="text/css" href="/vendor/sweetalert2/sweetalert2.min.css" rel="stylesheet">
