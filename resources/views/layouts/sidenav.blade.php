@@ -42,8 +42,11 @@
       </li>
       <li role="separator" class="dropdown-divider mt-4 mb-3 border-gray-700"></li>
 
-      <li class="nav-item {{ Request::segment(1) == 'blacklists' ? 'active' : '' }}">
-        <a href="{{ route('blacklists.index') }}" class="nav-link d-flex justify-content-between">
+      {{-- Menu blacklist  --}}
+      <li class="nav-item">
+        <span
+          class="nav-link {{ Request::is('blacklists*') ? '' : 'collapsed' }} d-flex justify-content-between align-items-center"
+          data-bs-toggle="collapse" data-bs-target="#submenu-blacklist" aria-expanded="{{ Request::is('blacklists*') ? 'true' : 'false' }}" aria-controls="submenu-blacklist">
           <span>
             <span class="sidebar-icon">
               <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
@@ -53,15 +56,87 @@
                 </path>
               </svg>
             </span>
-            <span class="sidebar-text">Blacklists </span>
+            <span class="sidebar-text">Blacklists</span>
           </span>
-          <span>
-            <span class="badge badge-sm bg-secondary ms-1">Risk</span>
+          <span class="link-arrow">
+            <svg class="icon icon-sm" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd"
+                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                    clip-rule="evenodd"></path>
+            </svg>
           </span>
-        </a>
+        </span>
+
+        <div class="multi-level collapse {{ Request::is('blacklists*') ? 'show' : '' }}" id="submenu-blacklist">
+          <ul class="flex-column nav">
+
+              {{-- Lien vers la liste --}}
+              <li class="nav-item {{ Request::is('blacklists') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ route('blacklists.index') }}">
+                      <span class="sidebar-text">Liste</span>
+                  </a>
+              </li>
+
+              {{-- Lien vers création --}}
+              <li class="nav-item {{ Request::is('blacklists/create') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ route('blacklists.create') }}">
+                      <span class="sidebar-text">Ajouter une entrée</span>
+                  </a>
+              </li>
+
+              {{-- Lien vers rapports --}}
+              <li class="nav-item {{ Request::is('blacklists/reports') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ route('blacklists.search') }}">
+                      <span class="sidebar-text">Recherche</span>
+                  </a>
+              </li>
+
+          </ul>
+        </div>
       </li>
 
+      {{-- Menu Mobile Money Taratra --}}
+      <li class="nav-item">
+        <span
+          class="nav-link {{ Request::is('mvola*') ? '' : 'collapsed' }} d-flex justify-content-between align-items-center"
+          data-bs-toggle="collapse" data-bs-target="#submenu-mvola" aria-expanded="{{ Request::is('mvola*') ? 'true' : 'false' }}" aria-controls="submenu-mvola">
+          <span>
+            <span class="sidebar-icon">
+              <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+            </span>
+            <span class="sidebar-text">Transactions mVola</span>
+          </span>
+          <span class="link-arrow">
+            <svg class="icon icon-sm" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+          </span>
+        </span>
 
+        <div class="multi-level collapse {{ Request::is('taratra*') ? 'show' : '' }}" id="submenu-mvola">
+          <ul class="flex-column nav">
+            <li class="nav-item {{ Request::is('mvola') ? 'active' : '' }}">
+              <a class="nav-link" href="#">
+                <span class="sidebar-text">Liste</span>
+              </a>
+            </li>
+            <li class="nav-item {{ Request::is('taratra/mvola/create') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ route('mvola.create') }}">
+                <span class="sidebar-text">Nouvelle transaction</span>
+              </a>
+            </li>
+            <li class="nav-item {{ Request::is('taratra/mvola/reports') ? 'active' : '' }}">
+              <a class="nav-link" href="#">
+                <span class="sidebar-text">Rapports</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </li>
+
+      {{-- Menu réclamation --}}
       <li class="nav-item">
         <span
           class="nav-link {{ Request::is('tickets*') ? '' : 'collapsed' }} d-flex justify-content-between align-items-center"

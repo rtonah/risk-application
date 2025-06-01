@@ -3,7 +3,7 @@
         <strong>Client is blacklisted!</strong><br>
         Name: {{ $blacklist->name }}<br>
         National ID: {{ $blacklist->national_id }}<br>
-        Status: {{ $blacklist->status == 1 ? 'Blacklisted' : 'Unblocked' }}
+        Status: {{ $blacklist->status == 'blacklisted' ? 'Blacklisted' : 'Unblocked' }}
     </div>
 @else
     <div class="alert alert-success">

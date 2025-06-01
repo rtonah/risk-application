@@ -65,11 +65,12 @@
                 </div>
                 <form method="GET" action="{{ route('blacklists.index') }}">
                     <select name="status" class="form-select fmxw-200 d-none d-md-inline" onchange="this.form.submit()">
-                        <option value="" {{ request('status') === null ? 'selected' : '' }}>Toutes clients ....</option>
-                        <option value="1" {{ request('status') == 1 ? 'selected' : '' }}>Blacklisted</option>
-                        <option value="2" {{ request('status') == 2 ? 'selected' : '' }}>Unblocked</option>
+                        <option value="" {{ request('status') === null || request('status') === '' ? 'selected' : '' }}>Tous les clients ...</option>
+                        <option value="blacklisted" {{ request('status') === 'blacklisted' ? 'selected' : '' }}>Blacklisted</option>
+                        <option value="unblocked" {{ request('status') === 'unblocked' ? 'selected' : '' }}>Unblocked</option>
                     </select>
                 </form>
+
             </div>
             <div class="col-3 col-lg-4 d-flex justify-content-end">
                 <div class="btn-group">

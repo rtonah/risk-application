@@ -20,6 +20,11 @@ class BlacklistController extends Controller
         return view('blacklists.index', compact('blacklists'));
     }
 
+    public function search() {
+
+        return view('blacklists.search');
+    }
+
     public function create() {
         return view('blacklists.create');
     }

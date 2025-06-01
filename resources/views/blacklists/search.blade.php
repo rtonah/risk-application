@@ -19,8 +19,8 @@
         </nav>
         <div class="d-flex justify-content-between w-100 flex-wrap">
             <div class="mb-3 mb-lg-0">
-                <h2 class="h4">Inscrire sur la liste noire</h2>
-                <p class="mb-0">Nous vous prions de prendre connaissance des éléments nécessaires avant d’inscrire un client sur la liste noire d’ACEP Madagascar.</p>
+                <h2 class="h4">Recherche dans la liste noire...</h2>
+                <p class="mb-0">Filtrer la liste noire par client, agence ou type...</p>
             </div>
             <div>
                 <a href="#" class="btn btn-outline-gray" target="_blank"><i class="far fa-question-circle me-1"></i> Forms Docs</a>
@@ -28,15 +28,11 @@
         </div>
     </div>
 
-    <livewire:blacklist.blacklist-form />
+    
+    <livewire:blacklist.blacklist-search />
+    {{-- <livewire:blacklist.blacklist-fuzzy-search /> --}}
+   
 
     {{-- And Main --}}
-    
-
-    {{-- Load JS file --}}
-    @push('scripts')
-        <script src="{{ asset('js/format-national-id.js') }}"></script>
-    @endpush
-    {{-- <script src="{{ asset('js/format-national-id.js') }}"></script> --}}
 </x-layouts.app>
 

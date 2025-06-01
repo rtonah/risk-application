@@ -59,4 +59,10 @@ class User extends Authenticatable
         return $this->hasMany(PurchaseRequest::class, 'purchase_manager_id');
     }
 
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+
 }

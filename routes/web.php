@@ -44,6 +44,8 @@ use Spatie\Permission\Models\Role;
 
 use App\Http\Livewire\Purchase\PurchaseRequestList;
 use App\Http\Livewire\Purchase\ReviewRequest;
+   use App\Exports\SalaryPaymentsExport;  // Assure-toi d'importer la bonne classe
+
 
 /*
 |--------------------------------------------------------------------------
@@ -96,10 +98,6 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/blacklists', [BlacklistController::class, 'index'])->name('blacklists.index');
-    Route::get('/blacklists/create', [BlacklistController::class, 'create'])->name('blacklists.create');
-    Route::post('/blacklists', [BlacklistController::class, 'store'])->name('blacklists.store');
-    Route::get('/blacklists/filter', [BlacklistController::class, 'filter'])->name('blacklists.filter');
     Route::get('/admin/users/{user}/edit', [UserRoleController::class, 'edit'])->name('admin.users.edit');
     Route::put('/admin/users/{user}/password', [UserRoleController::class, 'updatePassword'])->name('admin.pass.update');
     Route::get('/musoni_grace', [GraceController::class, 'index'])->name('grace.index');
@@ -139,20 +137,44 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
+#.. Musoni
 Route::group(['middleware' => ['role:admin']], function () {
+    
     Route::post('/blacklists/{id}/unblock', [BlacklistController::class, 'unblock'])->name('blacklists.unblock');
     Route::get('/musoni/setting', [SettingController::class, 'index'])->name('setting.index');
     Route::post('/musoni/setting', [SettingController::class, 'store'])->name('setting.store');
 
 });
 
-Route::get('/blacklist/export/excel', function () {
-    return Excel::download(new BlacklistExport, 'blacklist.xlsx');
-})->name('blacklist.export.excel');
+#.. Taratra
+Route::group(['middleware' => ['role:admin']], function () {
+    Route::get('/taratra/mvola/create', function () {
+        return view('musoni.taratra.create');
+    })->name('mvola.create');
+});
 
-Route::get('/blacklist/export/pdf', function () {
-    return Excel::download(new BlacklistExport, 'blacklist.pdf', \Maatwebsite\Excel\Excel::DOMPDF);
-})->name('blacklist.export.pdf');
+#.. Route Blacklist
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/blacklists', [BlacklistController::class, 'index'])->name('blacklists.index');
+    Route::get('/blacklists/create', [BlacklistController::class, 'create'])->name('blacklists.create');
+    Route::post('/blacklists', [BlacklistController::class, 'store'])->name('blacklists.store');
+    Route::get('/blacklists/filter', [BlacklistController::class, 'filter'])->name('blacklists.filter');
+    Route::get('/blacklists/search', [BlacklistController::class, 'search'])->name('blacklists.search');
+
+    Route::get('/blacklist/export/excel', function () {
+        return Excel::download(new BlacklistExport, 'blacklist.xlsx');
+    })->name('blacklist.export.excel');
+
+    Route::get('/blacklist/export/pdf', function () {
+        return Excel::download(new BlacklistExport, 'blacklist.pdf', \Maatwebsite\Excel\Excel::DOMPDF);
+    })->name('blacklist.export.pdf');
+
+    Route::get('/blacklist/template', function () {
+        return response()->download(storage_path('/app/public/templates/blacklist_import_template.xlsx'));
+    })->name('blacklist.template');
+
+});
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
 // Route::middleware(['auth'])->group(function () {
@@ -177,6 +199,14 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/salary-payments/template', [SalaryPaymentController::class, 'downloadTemplate'])->name('salary-payments.template');
     Route::post('/salary-payments/deposit', [SalaryPaymentController::class, 'deposit'])->name('salary-payments.deposit');
     Route::get('/export', [SalaryPaymentController::class, 'export'])->name('salary-payments.export');
+    // Route::get('/salary-payments/download', [SalaryPaymentController::class, 'download'])->name('salary-payments.download');
+
+
+
+    Route::get('/salary-payments/download/pdf', function () {
+        return Excel::download(new SalaryPaymentsExport, 'virement.xlsx');
+    })->name('salary-payments.download');
+
 
 });
 // Route::get('/test-export', [SalaryPaymentController::class, 'export']);

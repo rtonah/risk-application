@@ -14,15 +14,34 @@ use Illuminate\Support\Facades\Http;
 use App\Models\CbsCredential;
 use Carbon\Carbon;
 use App\Exports\SalaryPaymentExport;
-
+use App\Exports\SalaryPaymentsExport;
 
 class SalaryPaymentController extends Controller
 {
-    public function index()
+
+    public function index(Request $request)
     {
-        $salaryPayments = SalaryPayment::with('paymentType')->latest()->paginate(15);
+        $query = SalaryPayment::with('paymentType')->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+
+
+        if ($request->filled('from_date') && $request->filled('to_date')) {
+            $from = Carbon::parse($request->from_date)->startOfDay()->toDateString();
+            $to = Carbon::parse($request->to_date)->endOfDay()->toDateString();
+
+            $query->whereBetween('payment_date', [$from, $to]);
+        }
+
+
+        $salaryPayments = $query->paginate(15)->appends($request->all()); // Important pour garder les filtres en pagination
+
         return view('musoni.salary_payments.index', compact('salaryPayments'));
     }
+
 
     public function create()
     {
@@ -208,15 +227,19 @@ class SalaryPaymentController extends Controller
 
             $result = json_decode($response->body());
 
-            if ($response->successful()) {
+           if ($response->successful()) {
                 $data->operation_code = $result->resourceId ?? 'no_resource_id';
                 $data->status = 'processed';
+                $data->payment_date = now(); // 👈 On enregistre la date actuelle
             } else {
                 $data->operation_code = $result->errors[0]->developerMessage ?? 'Erreur inconnue';
                 $data->status = 'failed';
+                $data->payment_date = null; // 👈 On peut aussi forcer à null si échec
             }
+
             $data->processed_by = auth()->id(); // 👈 Ajout de l'utilisateur
             $data->save();
+
         }
 
         // Message final

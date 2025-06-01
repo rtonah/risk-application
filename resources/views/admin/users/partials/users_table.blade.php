@@ -36,7 +36,14 @@
                         </div>
                     </a>
                 </td>
-                <td><span class="fw-normal">{{ $user->roles->pluck('name')->first() ?? 'None' }}</span></td>
+                <td>
+                    <div class="d-block">
+                        <span class="fw-bold">{{ $user->roles->pluck('name')->first() ?? 'None' }}</span> 
+                        <div class="small text-gray">Agence : {{ $user->branch->name ?? 'Non affecté' }}</div>
+                    </div>
+                    
+                
+                </td>
                 <td><span class="fw-normal d-flex align-items-center">{{ $user->created_at->translatedFormat('d F Y') }}</span></td>
                 <td>
                     @if($user->status === 1)
