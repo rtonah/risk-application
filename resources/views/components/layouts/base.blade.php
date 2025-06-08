@@ -56,6 +56,8 @@
     
     <!-- Volt CSS -->
     <link type="text/css" href="/css/volt.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
 
     @livewireStyles
 
@@ -102,6 +104,8 @@
     <!-- Volt JS -->
     <script src="/assets/js/volt.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {{-- <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script> --}}
+
 
 
     @if(env('IS_DEMO')) 
@@ -137,7 +141,7 @@
     @endif
 
     {{ $slot }}
-
+            
 </body>
 
 </html>

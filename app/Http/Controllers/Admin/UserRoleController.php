@@ -36,6 +36,26 @@ class UserRoleController extends Controller
         return redirect()->route('admin.users.edit', $user)->with('success', 'Profil mis à jour avec succès.');
     }
 
+    #.. Update de photo de profil
+    public function updatePhoto(Request $request, User $user)
+    {
+        $request->validate([
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // ajout de validation pour la photo
+        ]);
+
+        // Gérer le fichier de photo de profil s'il est présent
+        if ($request->hasFile('profile_photo')) {
+            $path = $request->file('profile_photo')->store('profile_photos', 'public');
+            $user->profile_photo_path = $path;
+        }
+
+        $user->save();
+
+        return redirect()
+            ->route('admin.users.edit', $user)
+            ->with('success', 'Photo de Profil mis à jour avec succès.');
+    }
+
     #.. Update de l'utilisateurs
     public function updatePassword(Request $request, User $user)
     {

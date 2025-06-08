@@ -7,7 +7,10 @@ use Illuminate\Support\Facades\Crypt;
 
 class CbsCredential extends Model
 {
-    protected $fillable = ['name', 'login', 'password'];
+    protected $fillable = [
+        'name', 'domaine', 'login', 'password', 'token',
+    ];
+
 
     // Accessors et mutators pour cryptage automatique
 

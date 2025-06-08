@@ -1,25 +1,27 @@
 <nav class="navbar navbar-top navbar-expand navbar-dashboard navbar-dark ps-0 pe-2 pb-0">
   <div class="container-fluid px-0">
     <div class="d-flex justify-content-between w-100" id="navbarSupportedContent">
-      <div class="d-flex align-items-center">
-        <!-- Search form -->
-        <form class="navbar-search form-inline" id="navbar-search-main">
-          <div class="input-group input-group-merge search-bar">
-            <span class="input-group-text" id="topbar-addon"><svg class="icon icon-xs"
-                x-description="Heroicon name: solid/search" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd"
-                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                  clip-rule="evenodd"></path>
-              </svg></span></span>
-            <input type="text" class="form-control" id="topbarInputIconLeft" placeholder="Search" aria-label="Search"
-              aria-describedby="topbar-addon">
-          </div>
-        </form>
-        <a href="https://themesberg.com/product/laravel/volt-admin-dashboard-template" target="_blank"><button
-            class="btn mx-1 me-2 btn-secondary" type="button"><i
-              class="fas fa-arrow-down mx-1"></i>Download</button></a>
+      <div class="d-flex align-items-center gap-2">
+        @php
+          $env_label = strtoupper($env_mode);
+          $is_demo = $env_mode === 'demo';
+          $env_color = $is_demo ? 'bg-danger' : 'bg-success';
+          $env_text = $is_demo ? 'DEMO' : $env_label;
+        @endphp
+
+        <div class="d-flex align-items-center">
+          <span class="rounded-circle {{ $env_color }} d-inline-block me-2" 
+                style="width: 12px; height: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.3);">
+          </span>
+          <small class="text-muted">
+            MUSONI connecté : <strong>{{ $env_text }}</strong>
+          </small>
+        </div>
       </div>
+
+
+
+
       <!-- Navbar links -->
       <ul class="navbar-nav align-items-center">
         <li class="nav-item dropdown">
@@ -77,7 +79,11 @@
                 <div class="row align-items-center">
                   <div class="col-auto">
                     <!-- Avatar -->
-                    <img alt="Image placeholder" src="/assets/img/team/profile-picture-3.jpg" class="avatar-md rounded">
+                    <img 
+                      src="{{ Auth::user()->profile_photo_path ? asset('storage/' . Auth::user()->profile_photo_path) : asset('assets/img/team/avatar.png') }}" 
+                      class="avatar rounded-circle me-3" 
+                      alt="Avatar">
+
                   </div>
                   <div class="col ps-0 m-2">
                     <div class="d-flex justify-content-between align-items-center">
@@ -148,7 +154,10 @@
           <a class="nav-link dropdown-toggle pt-1 px-0" href="#" role="button" data-bs-toggle="dropdown"
             aria-expanded="false">
             <div class="media d-flex align-items-center">
-              <img class="avatar rounded-circle" alt="Image placeholder" src="/assets/img/team/profile-picture-1.jpg">
+              <img 
+                  src="{{ Auth::user()->profile_photo_path ? asset('storage/' . Auth::user()->profile_photo_path) : asset('assets/img/team/avatar.jpg') }}" 
+                  class="avatar rounded-circle me-3" 
+                  alt="Avatar">
               <div class="media-body ms-2 text-dark align-items-center d-none d-lg-block">
                 <span
                   class="mb-0 font-small fw-bold text-gray-900">{{  auth()->user()->first_name ? auth()->user()->first_name . ' ' . auth()->user()->last_name : 'User Name'}}</span>

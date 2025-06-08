@@ -15,10 +15,10 @@
                         </a>
                     </li>
                     <li class="breadcrumb-item"><a href="#">Musoni</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Virement salarial</li>
+                    <li class="breadcrumb-item active" aria-current="page">mVola</li>
                 </ol>
             </nav>
-            <h2 class="h4">Virement salarial MUSONI</h2>
+            <h2 class="h4">Dépost MOMO vers MUSONI</h2>
             <p class="mb-0">Transfert de fonds depuis portefeuille Mobile Money vers compte bancaire CBS.</p>
         </div>
     </div>

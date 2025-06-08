@@ -2,18 +2,16 @@
 
 namespace App\Imports;
 
-use App\Models\Mvola as ModelsMvola;
+use App\Models\Mvola as ModelMomo;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\OnEachRow;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Row;
-
-
 use Illuminate\Support\Collection;
 
 class MvolaImport implements OnEachRow, WithHeadingRow
 {
-    public static array $ignoredTransactions = []; // Liste statique
+    public static array $ignoredTransactions = [];
 
     public function onRow(Row $row)
     {
@@ -23,14 +21,19 @@ class MvolaImport implements OnEachRow, WithHeadingRow
             return;
         }
 
-        $exists = ModelsMvola::where('Transaction_Id', $data['n_transaction'])->exists();
+        $exists = ModelMomo::where('Transaction_Id', $data['n_transaction'])->exists();
 
         if ($exists) {
-            self::$ignoredTransactions[] = $data['n_transaction']; // Sauvegarde
+            self::$ignoredTransactions[] = $data['n_transaction'];
             return;
         }
 
-        ModelsMvola::create([
+        // ✅ Vérifier si la ligne est "prête" pour traitement
+        $isReady = !empty($data['details_2']) && // Account
+                   !empty($data['montant_mga']) && is_numeric($data['montant_mga']) && $data['montant_mga'] > 0 &&
+                   !empty($data['statut']) && strtolower($data['statut']) === 'completed';
+
+        ModelMomo::create([
             'Transaction_Date'        => ($data['date'] ?? null) . ' ' . ($data['heure'] ?? ''),
             'Transaction_Id'          => $data['n_transaction'],
             'Tsansaction_Initiateur'  => $data['initiateur'] ?? null,
@@ -48,9 +51,11 @@ class MvolaImport implements OnEachRow, WithHeadingRow
             'Account'                 => $data['details_2'] ?? null,
             'Validateur'              => $data['validateur'] ?? null,
             'Num_notif'               => $data['n_pour_notif'] ?? null,
-            'code_operation'          => $data['code_operation'] ?? null,
             'payment_date'            => isset($data['payment_date']) ? date('Y-m-d H:i:s', strtotime($data['payment_date'])) : null,
-            'processed_by'            => $data['processed_by'] ?? null,
+            'processed_by'            => Auth::id(),
+            'code_operation'          => 'new',
+            'provider'                => 'mvola',
+            'is_ready'                => $isReady, // ✅ important
         ]);
     }
 

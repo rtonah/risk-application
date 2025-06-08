@@ -33,6 +33,7 @@
 
     @endif
     @stack('scripts')
+
      <script>
         window.addEventListener('hide-import-modal', () => {
             const modal = bootstrap.Modal.getInstance(document.getElementById('importModal'));

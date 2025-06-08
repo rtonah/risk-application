@@ -33,6 +33,10 @@ class Mvola extends Model
         'status',
         'payment_date',
         'processed_by',
+        'is_ready',
+        'processing_attempts',
+        'last_error_message',
+        'provider'
     ];
 
     protected $casts = [

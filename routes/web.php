@@ -15,11 +15,7 @@ use App\Http\Livewire\Lock;
 use App\Http\Livewire\Auth\Login;
 use App\Http\Livewire\Profile;
 use App\Http\Livewire\Auth\Register;
-use App\Http\Livewire\ForgotPasswordExample;
-use App\Http\Livewire\Index;
-use App\Http\Livewire\LoginExample;
-use App\Http\Livewire\ProfileExample;
-use App\Http\Livewire\RegisterExample;
+
 use App\Http\Livewire\Transactions;
 use Illuminate\Support\Facades\Route;
 use App\Http\Livewire\ResetPasswordExample;
@@ -41,6 +37,9 @@ use App\Http\Controllers\Ticket\Conformite\GestionController;
 use App\Http\Controllers\Ticket\Conformite\BaseConnaissanceController;
 use App\Http\Livewire\Purchase\MyPurchaseRequests;
 use Spatie\Permission\Models\Role;
+
+use App\Http\Livewire\Admin\RoleManager;
+use App\Http\Livewire\Admin\RolePermissions;
 
 use App\Http\Livewire\Purchase\PurchaseRequestList;
 use App\Http\Livewire\Purchase\ReviewRequest;
@@ -73,200 +72,132 @@ Route::get('/500', Err500::class)->name('500');
 Route::get('/upgrade-to-pro', UpgradeToPro::class)->name('upgrade-to-pro');
 
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
 
+// Tableau de bord
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware('auth')->name('dashboard');
+
+// Route::get('/chart', \App\Http\Livewire\C::class)->name('chart');
+
+// Routes accessibles à tous les utilisateurs authentifiés
 Route::middleware('auth')->group(function () {
     Route::get('/profile', Profile::class)->name('profile');
-    Route::get('/profile-example', ProfileExample::class)->name('profile-example');
-    Route::get('/users', Users::class)->name('users');
-    Route::get('/login-example', LoginExample::class)->name('login-example');
-    Route::get('/register-example', RegisterExample::class)->name('register-example');
-    Route::get('/forgot-password-example', ForgotPasswordExample::class)->name('forgot-password-example');
-    Route::get('/reset-password-example', ResetPasswordExample::class)->name('reset-password-example');
-    Route::get('/dashboard', Dashboard::class)->name('dashboard');
-    Route::get('/transactions', Transactions::class)->name('transactions');
-    Route::get('/bootstrap-tables', BootstrapTables::class)->name('bootstrap-tables');
-    Route::get('/lock', Lock::class)->name('lock');
-    Route::get('/buttons', Buttons::class)->name('buttons');
-    Route::get('/notifications', Notifications::class)->name('notifications');
-    Route::get('/forms', Forms::class)->name('forms');
-    Route::get('/modals', Modals::class)->name('modals');
-    Route::get('/typography', Typography::class)->name('typography');
-
-    
-
+    Route::get('/purchase-requests/mes-demandes', fn() => view('purchase.my-request'))->name('purchase-requests.mine');
+    Route::get('/blacklists/search', [BlacklistController::class, 'search'])->name('blacklists.search');
+    Route::get('tickets/create', [TicketController::class, 'create'])->name('tickets.create');
+    Route::get('tickets/me', [TicketController::class, 'MonTicket'])->name('tickets.me');
+    Route::get('/blacklists/filter', [BlacklistController::class, 'filter'])->name('blacklists.filter');
+    Route::post('tickets', [TicketController::class, 'store'])->name('tickets.store');
+    Route::get('tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
+    Route::get('/purchase-requests', [PurchaseRequestController::class, 'index'])->name('purchase-requests.index');
+    Route::get('/purchase-requests/create', [PurchaseRequestController::class, 'create'])->name('purchase-requests.create');
 
 });
 
-Route::middleware(['auth'])->group(function () {
+// Admin uniquement
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/users', [UserRoleController::class, 'index'])->name('admin.users.index');
     Route::get('/admin/users/{user}/edit', [UserRoleController::class, 'edit'])->name('admin.users.edit');
+    Route::put('/admin/users/{user}', [UserRoleController::class, 'update'])->name('admin.users.update');
     Route::put('/admin/users/{user}/password', [UserRoleController::class, 'updatePassword'])->name('admin.pass.update');
+    Route::put('/admin/users/{user}/profile', [UserRoleController::class, 'updatePhoto'])->name('admin.profil.update');
+
+    Route::get('/admin/settings', fn() => view('admin.settings.index'))->name('admin.settings');
+    Route::get('/admin/cbs-config', fn() => view('admin.settings.cbs-config'))->name('admin.cbs-config');
+
+    Route::get('/roles', [UserRoleController::class, 'roles'])->name('roles.index');
+    Route::post('/roles', [UserRoleController::class, 'roles_store'])->name('roles.store');
+
+});
+
+// Superviseur
+Route::middleware(['auth', 'role:Superviseur|admin'])->group(function () {
+    
+    Route::get('/purchase-requests/{id}/review', fn($id) => 
+        view('purchase.review', [
+            'purchaseRequest' => \App\Models\PurchaseRequest::with('items', 'user')->findOrFail($id)
+        ])
+    )->name('purchase-requests.review');
     Route::get('/musoni_grace', [GraceController::class, 'index'])->name('grace.index');
 });
 
-#.. Purchage request
-// Route::middleware(['auth'])->group(function () {
-
-    // Route::post('/purchase-requests', [PurchaseRequestController::class, 'store'])->name('purchase-requests.store');
-    // Route::get('/purchase-requests', [PurchaseRequestController::class, 'index'])->name('purchase-requests.index');
-    // Route::get('/purchase-requests/review', [PurchaseRequestController::class, 'review'])->name('purchase-requests.review');
-    // Route::get('/purchase-requests/liste', [PurchaseRequestController::class, 'liste'])->name('purchase-requests.liste');
-
-//     Route::get('/purchase-requests', PurchaseRequestList::class)->name('purchase-requests.index');
-//     Route::get('/purchase-requests/{purchaseRequest}/review', ReviewRequest::class)->name('purchase-requests.review');
-
-// });
-Route::middleware(['auth'])->group(function () {
-    // Route::get('/purchase-requests', PurchaseRequestList::class)->name('purchase-requests.index');
-    Route::get('/purchase-requests', [PurchaseRequestController::class, 'index'])->name('purchase-requests.index');
-    Route::get('/purchase-requests/create', [PurchaseRequestController::class, 'create'])->name('purchase-requests.create');
-    
-    Route::get('/purchase-requests/{id}/review', function ($id) {
-        $purchaseRequest = \App\Models\PurchaseRequest::with('items', 'user')->findOrFail($id);
-        return view('purchase.review', compact('purchaseRequest'));
-    })->name('purchase-requests.review');
-
-    // Route::get('/purchase-requests/{purchaseRequest}/review', ReviewRequest::class)
-    // ->name('purchase-requests.review');
-
-    #.. Pour l'utilisateurs 
-
-    Route::get('/purchase-requests/mes-demandes', function () {
-        return view('purchase.my-request');
-    })->name('purchase-requests.mine');
-
-
-});
-
-#.. Musoni
-Route::group(['middleware' => ['role:admin']], function () {
-    
-    Route::post('/blacklists/{id}/unblock', [BlacklistController::class, 'unblock'])->name('blacklists.unblock');
-    Route::get('/musoni/setting', [SettingController::class, 'index'])->name('setting.index');
-    Route::post('/musoni/setting', [SettingController::class, 'store'])->name('setting.store');
-
-});
-
-#.. Taratra
-Route::group(['middleware' => ['role:admin']], function () {
-    Route::get('/taratra/mvola/create', function () {
-        return view('musoni.taratra.create');
-    })->name('mvola.create');
-});
-
-#.. Route Blacklist
-Route::middleware(['auth'])->group(function () {
-
-    Route::get('/blacklists', [BlacklistController::class, 'index'])->name('blacklists.index');
+// Conformité
+Route::middleware(['auth', 'role:Conformité|admin'])->group(function () {
+    Route::get('/conformite/tickets', [GestionController::class, 'index'])->name('compliance.tickets.index');
+    Route::post('/conformite/tickets/filter', [GestionController::class, 'filter'])->name('compliance.tickets.filter');
+    Route::post('/conformite/tickets/{id}/assign', [GestionController::class, 'assign'])->name('compliance.tickets.assign');
+    Route::post('/conformite/tickets/{id}/status', [GestionController::class, 'status'])->name('compliance.tickets.status');
     Route::get('/blacklists/create', [BlacklistController::class, 'create'])->name('blacklists.create');
-    Route::post('/blacklists', [BlacklistController::class, 'store'])->name('blacklists.store');
-    Route::get('/blacklists/filter', [BlacklistController::class, 'filter'])->name('blacklists.filter');
-    Route::get('/blacklists/search', [BlacklistController::class, 'search'])->name('blacklists.search');
+    Route::get('tickets_gestion', [GestionController::class, 'index'])->name('tickets.compliance.index');
+    Route::get('tickets', [TicketController::class, 'index'])->name('tickets.index');
+    Route::post('/tickets/{ticket}/assign', [GestionController::class, 'assign'])->name('tickets.compliance.assign');
+    Route::post('/tickets/{ticket}/status', [GestionController::class, 'updateStatus'])->name('tickets.compliance.status');
+    Route::get('tickets/filter', [GestionController::class, 'filter'])->name('compliance.filter');
 
     Route::get('/blacklist/export/excel', function () {
         return Excel::download(new BlacklistExport, 'blacklist.xlsx');
     })->name('blacklist.export.excel');
-
     Route::get('/blacklist/export/pdf', function () {
         return Excel::download(new BlacklistExport, 'blacklist.pdf', \Maatwebsite\Excel\Excel::DOMPDF);
     })->name('blacklist.export.pdf');
-
     Route::get('/blacklist/template', function () {
         return response()->download(storage_path('/app/public/templates/blacklist_import_template.xlsx'));
     })->name('blacklist.template');
+    Route::post('/blacklists/{id}/unblock', [BlacklistController::class, 'unblock'])->name('blacklists.unblock');
+    Route::get('/blacklists', [BlacklistController::class, 'index'])->name('blacklists.index');
 
 });
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
-// Route::middleware(['auth'])->group(function () {
-
-    Route::post('/admin/users/{user}/roles', [UserRoleController::class, 'updateRoles'])->name('admin.users.updateRoles');
-    Route::get('/admin/users', [UserRoleController::class, 'index'])->name('admin.users.index');
-    Route::put('/admin/users/{user}', [UserRoleController::class, 'update'])->name('admin.users.update');
-
-    Route::post('/admin/users/{user}/deactivate', [UserRoleController::class, 'deactivate'])->name('admin.users.deactivate');
-
-
-    Route::get('/roles', [UserRoleController::class, 'roles'])->name('roles.index');
-    Route::get('/roles/{role}/permissions', [UserRoleController::class, 'getPermissions']);
-    
-    Route::post('/roles', [UserRoleController::class, 'roles_store'])->name('roles.store');
-
-    Route::post('/admin/store', [UserRoleController::class, 'store'])->name('users.store');
-
-    #.. Payement SALAIRE
+// Comptable
+Route::middleware(['auth', 'role:Comptable|admin'])->group(function () {
+    Route::get('/musoni/salary-payments', [SalaryPaymentController::class, 'index'])->name('salary-payments.index');
+    // Route::get('/musoni/salary-payments/export', SalaryPaymentsExport::class)->name('salary-payments.export');
+    Route::get('/musoni/salary-payments/export', [SalaryPaymentController::class, 'export'])->name('salary-payments.export');
     Route::resource('salary-payments', SalaryPaymentController::class);
-    Route::post('/salary-payments/import', [SalaryPaymentController::class, 'import'])->name('salary-payments.import');
-    Route::get('/salary-payments/template', [SalaryPaymentController::class, 'downloadTemplate'])->name('salary-payments.template');
-    Route::post('/salary-payments/deposit', [SalaryPaymentController::class, 'deposit'])->name('salary-payments.deposit');
-    Route::get('/export', [SalaryPaymentController::class, 'export'])->name('salary-payments.export');
-    // Route::get('/salary-payments/download', [SalaryPaymentController::class, 'download'])->name('salary-payments.download');
-
-
-
     Route::get('/salary-payments/download/pdf', function () {
         return Excel::download(new SalaryPaymentsExport, 'virement.xlsx');
     })->name('salary-payments.download');
-
+    Route::post('/salary-payments/import', [SalaryPaymentController::class, 'import'])->name('salary-payments.import');
+    Route::get('/salary-payments/template', [SalaryPaymentController::class, 'downloadTemplate'])->name('salary-payments.template');
+    Route::post('/salary-payments/deposit', [SalaryPaymentController::class, 'deposit'])->name('salary-payments.deposit');
 
 });
-// Route::get('/test-export', [SalaryPaymentController::class, 'export']);
 
-Route::middleware(['auth'])->group(function () {
-
-    /**
-     * 🟢 Agent Terrain : peut créer des tickets et discuter
-     */
-    Route::middleware(['role:Agent Terrain|admin'])->group(function () {
-        Route::get('tickets/create', [TicketController::class, 'create'])->name('tickets.create');
-        Route::post('tickets', [TicketController::class, 'store'])->name('tickets.store');
-        Route::get('tickets', [TicketController::class, 'index'])->name('tickets.index');
-        Route::get('tickets/me', [TicketController::class, 'MonTicket'])->name('tickets.me');
-        Route::get('tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
-        Route::post('tickets/{ticket}/messages', [MessageController::class, 'store'])->name('tickets.messages.store');
-        Route::post('tickets/{ticket}/attachments', [AttachmentController::class, 'store'])->name('tickets.attachments.store');
-    });
-
-    /**
-     * 🟡 Superviseur : même droits que l'agent + vue plus globale
-     */
-    Route::middleware(['role:Superviseur'])->group(function () {
-        Route::get('tickets', [TicketController::class, 'index'])->name('tickets.superviseur.index');
-        Route::get('tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.superviseur.show');
-        // Route::post('tickets/{ticket}/messages', [MessageController::class, 'store'])->name('tickets.superviseur.messages');
-    });
-
-    /**
-     * 🔴 Équipe Conformité : traitement, escalade, clôture
-     */
-    Route::middleware(['role:Conformité|admin'])->group(function () {
-        Route::get('tickets', [TicketController::class, 'index'])->name('tickets.index');
-        Route::get('tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.compliance.show');
-        // Route::post('tickets/{ticket}/messages', [MessageController::class, 'store'])->name('tickets.compliance.messages');
-
-        Route::post('tickets/{ticket}/escalate', [GestionController::class, 'escalate'])->name('tickets.compliance.escalate');
-        Route::post('tickets/{ticket}/close', [GestionController::class, 'close'])->name('tickets.compliance.close');
-        Route::get('tickets/filter', [GestionController::class, 'filter'])->name('compliance.filter');
-        Route::get('tickets_gestion', [GestionController::class, 'index'])->name('tickets.compliance.index');
-        // Route::post('tickets_gestion', [GestionController::class, 'assign'])->name('tickets.compliance.assign');
-        Route::post('/tickets/{ticket}/assign', [GestionController::class, 'assign'])->name('tickets.compliance.assign');
-        Route::post('/tickets/{ticket}/status', [GestionController::class, 'updateStatus'])->name('tickets.compliance.status');
-    });
-
-    /**
-     * 📚 Base de connaissance : accès lecture pour Consultant
-     */
-    Route::middleware(['role:Consultant'])->group(function () {
-        Route::get('base-connaissance', [BaseConnaissanceController::class, 'index'])->name('base.index');
-        Route::get('base-connaissance/{id}', [BaseConnaissanceController::class, 'show'])->name('base.show');
-    });
-
-    /**
-     * ⚙️ Admin : tous les accès
-     */
-    Route::middleware(['role:admin'])->group(function () {
-        Route::resource('tickets', TicketController::class)->except(['create', 'store']);
-        Route::resource('base-connaissance', BaseConnaissanceController::class);
-        
-    });
+// Procurement
+Route::middleware(['auth', 'role:Procurement|admin'])->group(function () {
+    Route::get('/purchase-requests', [PurchaseRequestController::class, 'index'])->name('purchase-requests.index');
 });
 
+// Autres rôles (à compléter si besoin)
+Route::middleware(['auth', 'role:Agent Terrain|admin'])->group(function () {
+    // Exemples de routes spécifiques à Agent Terrain
+});
+
+Route::middleware(['auth', 'role:Consultant|admin'])->group(function () {
+    // Exemples de routes spécifiques à Consultant
+});
+
+Route::middleware(['auth', 'role:Momo Team|admin'])->group(function () {
+    // Exemples de routes spécifiques à Momo Team
+    Route::get('/taratra/mvola/create', function () {
+        return view('musoni.taratra.create');
+    })->name('mvola.create');
+    
+    Route::get('/taratra/mvola/repports', function () {
+        return view('musoni.taratra.repports');
+    })->name('mvola.repports');
+});
+
+Route::middleware(['auth', 'role:Directeur et Chef d\'agence'])->group(function () {
+    // Exemples de routes spécifiques à la direction
+});
+
+Route::middleware(['auth', 'role:Collaborateur'])->group(function () {
+    // Exemples de routes spécifiques à Collaborateur
+});

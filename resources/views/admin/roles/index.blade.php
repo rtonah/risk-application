@@ -39,7 +39,7 @@
     
     {{-- Start Role --}}
     
-        @livewire('role-permission-viewer')
+    <livewire:admin.role-manager />
 
     {{-- End Role --}}
      <div class="col-lg-4">
@@ -66,19 +66,18 @@
                                         @error('name') <div class="text-danger">{{ $message }}</div> @enderror
                                     </div>
 
-                                    <div class="mb-3">
+                                   <div class="mb-3">
                                         <label class="form-label">Permissions</label>
-                                        <div class="row">
+                                        <div>
                                             @foreach($permissions as $permission)
-                                                <div class="col-md-4">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" name="permissions[]" value="{{ $permission->name }}" id="perm_{{ $permission->id }}">
-                                                        <label class="form-check-label" for="perm_{{ $permission->id }}">{{ $permission->name }}</label>
-                                                    </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="permissions[]" value="{{ $permission->name }}" id="perm_{{ $permission->id }}">
+                                                    <label class="form-check-label" for="perm_{{ $permission->id }}">{{ $permission->name }}</label>
                                                 </div>
                                             @endforeach
                                         </div>
                                     </div>
+
 
                                     <button type="submit" class="btn btn-primary">Créer</button>
                                 </form>

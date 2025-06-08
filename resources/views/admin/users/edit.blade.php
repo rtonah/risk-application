@@ -22,21 +22,6 @@
         <h2 class="h4">Liste des utilisateurs</h2>
         <p class="mb-0">Affiche tous les utilisateurs ayant accès à l'application, avec leurs rôles et informations associées..</p>
     </div>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="#" class="btn btn-sm btn-gray-800 d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modal-form-signup">
-            <svg class="icon icon-xs me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
-                </path>
-            </svg>
-            New User
-        </a>
-
-        <div class="btn-group ms-2 ms-lg-3">
-            <button type="button" class="btn btn-sm btn-outline-gray-600">Share</button>
-            <button type="button" class="btn btn-sm btn-outline-gray-600">Export</button>
-        </div>
-    </div>
 </div>
 
 
@@ -44,9 +29,10 @@
         <div class="col-12 col-xl-8">
             <div class="card card-body border-0 shadow mb-4">
                 <h2 class="h5 mb-4">General information</h2>
-                <form action="{{ route('admin.users.update', $user) }}" method="POST">
+                <form action="{{ route('admin.users.update', $user) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
+                    
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <div>
@@ -94,7 +80,7 @@
                         </div>
                         <div class="col-sm-3 mb-3">
                             <div class="form-group">
-                                <label for="number">Number</label>
+                                <label for="number">Phone</label>
                                 <input wire:model="user.number" class="form-control" id="number" type="number"
                                     placeholder="No." name="number" value="{{ $user->number }}">
                             </div>
@@ -129,6 +115,42 @@
         <div class="col-12 col-xl-4">
             <div class="row">
                 <div class="col-12 mb-4">
+
+                    <div class="card shadow border-0 text-center p-0 mb-4">
+                        <div wire:ignore.self class="profile-cover rounded-top"
+                            data-background="{{ asset('assets/img/background.png') }}">
+                        </div>
+
+                        <div class="card-body pb-5">
+                            {{-- Affichage de la photo de profil si elle existe --}}
+                            @if ($user->profile_photo_path)
+                                <img src="{{ asset('storage/' . $user->profile_photo_path) }}"
+                                    class="avatar-xl rounded-circle mx-auto mt-n7 mb-2" alt="Portrait utilisateur">
+                            @else
+                                <img src="{{ asset('default-avatar.png') }}"
+                                    class="avatar-xl rounded-circle mx-auto mt-n7 mb-2" alt="Avatar par défaut">
+                            @endif
+
+                            {{-- Message d'erreur pour le champ profile_photo --}}
+                            @error('profile_photo')
+                                <div class="text-danger small">{{ $message }}</div>
+                            @enderror
+
+                            {{-- Formulaire de mise à jour de la photo --}}
+                            <form action="{{ route('admin.profil.update', $user) }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                @method('PUT')
+
+                                <div class="mb-4">
+                                    <label for="profile_photo" class="form-label">Modifier la photo de profil</label>
+                                    <input type="file" name="profile_photo" id="profile_photo" class="form-control">
+                                </div>
+
+                                <button type="submit" class="btn btn-sm btn-secondary">Mettre à jour</button>
+                            </form>
+                        </div>
+                    </div>
+
 
                     <div class="card shadow border-0 text-center p-0">
                         <div class="card-body pb-5">

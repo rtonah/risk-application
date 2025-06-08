@@ -25,9 +25,4 @@ class SalaryPayment extends Model
         return $this->belongsTo(PaymentType::class);
     }
 
-    public function processedBy()
-    {
-        return $this->belongsTo(User::class, 'processed_by');
-    }
-
 }
