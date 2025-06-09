@@ -69,6 +69,67 @@
                     </div>
                 </li>
             @endcan
+
+            {{-- Menu incidents --}}
+            @can('lookup_incidents')
+                <li class="nav-item">
+                    <span
+                        class="nav-link {{ Request::is('incidents*') ? '' : 'collapsed' }} d-flex justify-content-between align-items-center"
+                        data-bs-toggle="collapse" data-bs-target="#submenu-incidents" aria-expanded="{{ Request::is('incidents*') ? 'true' : 'false' }}" aria-controls="submenu-incidents">
+                        <span>
+                            <span class="sidebar-icon">
+                                <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M3 3h14v14H3V3z M5 7h10v2H5V7z M5 11h6v2H5v-2z" />
+                                </svg>
+                            </span>
+                            <span class="sidebar-text">Incidents SI</span>
+                        </span>
+                        <span class="link-arrow">
+                            <svg class="icon icon-sm" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd"
+                                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
+                        </span>
+                    </span>
+
+                    <div class="multi-level collapse {{ Request::is('incidents*') ? 'show' : '' }}" id="submenu-incidents">
+                        <ul class="flex-column nav">
+                                {{-- Lien vers la liste --}}
+                                <li class="nav-item {{ Request::is('incidents') ? 'active' : '' }}">
+                                    <a class="nav-link" href="{{ route('incidents.index') }}">
+                                        <span class="sidebar-text">Liste des incidents</span>
+                                    </a>
+                                </li>
+                            @can('update_incidents')
+                                {{-- Lien vers création --}}
+                                <li class="nav-item {{ Request::is('incidents/create') ? 'active' : '' }}">
+                                    <a class="nav-link" href="{{ route('incidents.create') }}">
+                                        <span class="sidebar-text">Ajouter un incident</span>
+                                    </a>
+                                </li>
+                            @endcan
+
+                            {{-- Lien vers recherche ou rapports --}}
+                            <li class="nav-item {{ Request::is('incidents/search') ? 'active' : '' }}">
+                                <a class="nav-link" href="{{ route('incidents.search') }}">
+                                    <span class="sidebar-text">Recherche</span>
+                                </a>
+                            </li>
+                            
+                             {{-- IT Dashcboards --}}
+                            <li class="nav-item {{ Request::is('incidents/dashboard') ? 'active' : '' }}">
+                                <a class="nav-link" href="{{ route('incidents.dashboard') }}">
+                                    <span class="sidebar-text">Dashboard IT</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            @endcan
+
             
             {{-- Menu Mobile Money Taratra --}}
             @can('execute_payroll')

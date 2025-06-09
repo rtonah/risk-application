@@ -43,8 +43,8 @@ use App\Http\Livewire\Admin\RolePermissions;
 
 use App\Http\Livewire\Purchase\PurchaseRequestList;
 use App\Http\Livewire\Purchase\ReviewRequest;
-   use App\Exports\SalaryPaymentsExport;  // Assure-toi d'importer la bonne classe
-
+use App\Exports\SalaryPaymentsExport;  // Assure-toi d'importer la bonne classe
+use App\Http\Controllers\Incidence\IncidenceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -84,6 +84,14 @@ Route::get('/dashboard', function () {
 })->middleware('auth')->name('dashboard');
 
 // Route::get('/chart', \App\Http\Livewire\C::class)->name('chart');
+
+#.. Incident informatique
+Route::middleware('auth')->group(function () {
+    Route::get('/incidents', [IncidenceController::class, 'index'])->name('incidents.index');
+    Route::get('/incidents/create', [IncidenceController::class, 'create'])->name('incidents.create');
+    Route::get('/incidents/search', [IncidenceController::class, 'search'])->name('incidents.search');
+    Route::get('/incidents/dashboard', [IncidenceController::class, 'dashboard'])->name('incidents.dashboard');
+});
 
 // Routes accessibles à tous les utilisateurs authentifiés
 Route::middleware('auth')->group(function () {

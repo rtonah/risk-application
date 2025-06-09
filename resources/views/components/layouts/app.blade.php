@@ -2,7 +2,7 @@
     {{-- @if(in_array(request()->route()->getName(), ['dashboard', 'profile', 'profile-example', 'users', 'bootstrap-tables', 'transactions',
         'buttons','forms', 'modals', 'notifications', 'typography', 'upgrade-to-pro', 'blacklists.index', 'blacklists.create', 'blacklists.edit', 'blacklists.show'])) --}}
     @if(Str::startsWith(request()->route()->getName(), [
-        'dashboard', 'blacklists', 'admin', 'tickets', 'roles', 'create', 'musoni', 'grace', 'setting', 'salary-payments', 'purchase-request','mvola'
+        'dashboard', 'blacklists', 'admin', 'tickets', 'roles', 'create', 'musoni', 'grace', 'setting', 'salary-payments', 'purchase-request','mvola', 'incidents'
     ]))
 
             {{-- Nav --}}
