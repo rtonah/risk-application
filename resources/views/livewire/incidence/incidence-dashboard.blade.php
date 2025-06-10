@@ -80,16 +80,42 @@
 {{-- --------------------------------------------- --}}
 {{-- KPI par technicien : Performance --}}
 {{-- --------------------------------------------- --}}
-<div class="col-12 mb-4">
-    <div class="card border-0 shadow" style="background-color: #fdeeee;">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h2 class="fs-6 fw-normal mb-2">Performance des techniciens</h2>
-        </div>
-        <div class="card-body">
-            <canvas id="technicianChart" height="120"></canvas>
+
+<div class="row">
+    <div class="col-12 col-md-8 mb-4">
+        <div class="card border-0 shadow" style="background-color: #fdeeee;">
+            <div class="card-header d-sm-flex flex-row align-items-center flex-0">
+                <div class="d-block">
+                    <div class="fs-6 fw-normal mb-2">Performance des techniciens</div>
+                </div>
+            </div>
+            <div class="card-body p-2 d-flex justify-content-center">
+                <div class="position-relative" style="width: 100%; height: 300px;">
+                    <canvas id="technicianChart" style="width: 100%; height: 100%; display: block;"></canvas>
+                </div>
+            </div>
         </div>
     </div>
+
+    <div class="col-12 col-md-4 mb-4">
+        <div class="card border-0 shadow" style="background-color: #fdeeee;">
+            <div class="card-header d-sm-flex flex-row align-items-center flex-0">
+                <div class="d-block">
+                    <div class="fs-6 fw-normal mb-2">Répartition par status du tickets</div>
+                </div>
+            </div>
+            <div class="card-body p-2 d-flex justify-content-center">
+                <div class="position-relative" style="max-width: 280px; height: 300px; margin: 0 auto;">
+                    <canvas id="ticketStatusChart" style="width: 100%; height: 100%; display: block;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+<livewire:connected-users />
+
 
 {{-- --------------------------------------------- --}}
 {{-- Liste des tickets récents --}}
@@ -210,26 +236,71 @@
                 type: 'bar',
                 data: {
                     labels: @json($technicianKpiChart['labels']),
+                    datasets: [
+                        {
+                            label: 'Assignés',
+                            data: @json($technicianKpiChart['datasets'][0]['data']),
+                            backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                        },
+                        {
+                            label: 'Clôturés',
+                            data: @json($technicianKpiChart['datasets'][1]['data']),
+                            backgroundColor: 'rgba(75, 192, 192, 0.7)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false,
+                            title: { display: true, text: 'Techniciens' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Tickets' }
+                        }
+                    }
+                }
+            });
+
+
+            // Graphique pour les statuts ticket
+            const ctx = document.getElementById('ticketStatusChart').getContext('2d');
+
+            const ticketStatusChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: @json($ticketStatusChart['labels']),
                     datasets: [{
-                        label: 'Tickets traités',
-                        data: @json($technicianKpiChart['data']),
-                        backgroundColor: '#4c84ff',
-                        borderRadius: 4
+                        label: 'Tickets par statut',
+                        data: @json($ticketStatusChart['data']),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',    // rouge - open
+                            'rgba(255, 206, 86, 0.7)',    // jaune - in_progress
+                            'rgba(75, 192, 192, 0.7)'     // vert - closed
+                        ],
+                        borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
                     plugins: {
-                        legend: { display: false },
-                        tooltip: { mode: 'index', intersect: false }
-                    },
-                    scales: {
-                        x: { title: { display: true, text: 'Techniciens' }},
-                        y: { beginAtZero: true, title: { display: true, text: 'Tickets' } }
+                        legend: { position: 'bottom' }
                     }
                 }
             });
-        });
+
+            // Optionnel : Recharger le graphique à chaque update Livewire si besoin
+            Livewire.on('refreshTicketStatusChart', () => {
+                ticketStatusChart.data.datasets[0].data = @json($ticketStatusChart['data']);
+                ticketStatusChart.update();
+            });
+            });
     </script>
     @endpush
 @endonce

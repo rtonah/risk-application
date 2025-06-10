@@ -45,6 +45,7 @@ use App\Http\Livewire\Purchase\PurchaseRequestList;
 use App\Http\Livewire\Purchase\ReviewRequest;
 use App\Exports\SalaryPaymentsExport;  // Assure-toi d'importer la bonne classe
 use App\Http\Controllers\Incidence\IncidenceController;
+use App\Http\Controllers\IncidentRo\IncidentRoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -90,7 +91,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/incidents', [IncidenceController::class, 'index'])->name('incidents.index');
     Route::get('/incidents/create', [IncidenceController::class, 'create'])->name('incidents.create');
     Route::get('/incidents/search', [IncidenceController::class, 'search'])->name('incidents.search');
-    Route::get('/incidents/dashboard', [IncidenceController::class, 'dashboard'])->name('incidents.dashboard');
+
+    #.. Grace
+    Route::get('/musoni_grace', [GraceController::class, 'index'])->name('grace.index');
+    Route::get('/musoni_grace/dashboard', [GraceController::class, 'dashboard'])->name('grace.dashboard');
+
+     
+    #.. Incident RO
+    Route::get('/risque', [IncidentRoController::class, 'index'])->name('risque.index');
+    Route::get('/risque/create', [IncidentRoController::class, 'create'])->name('risque.create');
+    Route::get('/risque/dashboard', [IncidentRoController::class, 'dashboard'])->name('risque.dashboard');
 });
 
 // Routes accessibles à tous les utilisateurs authentifiés
@@ -109,7 +119,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Admin uniquement
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'role:admin|Informaticien'])->group(function () {
     Route::get('/admin/users', [UserRoleController::class, 'index'])->name('admin.users.index');
     Route::get('/admin/users/{user}/edit', [UserRoleController::class, 'edit'])->name('admin.users.edit');
     Route::put('/admin/users/{user}', [UserRoleController::class, 'update'])->name('admin.users.update');
@@ -122,6 +132,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/roles', [UserRoleController::class, 'roles'])->name('roles.index');
     Route::post('/roles', [UserRoleController::class, 'roles_store'])->name('roles.store');
 
+    #.. Ticket IT
+    Route::get('/incidents/dashboard', [IncidenceController::class, 'dashboard'])->name('incidents.dashboard');
+
 });
 
 // Superviseur
@@ -132,7 +145,7 @@ Route::middleware(['auth', 'role:Superviseur|admin'])->group(function () {
             'purchaseRequest' => \App\Models\PurchaseRequest::with('items', 'user')->findOrFail($id)
         ])
     )->name('purchase-requests.review');
-    Route::get('/musoni_grace', [GraceController::class, 'index'])->name('grace.index');
+  
 });
 
 // Conformité

@@ -96,7 +96,7 @@
                         <select wire:model="assignedUserId" class="form-select">
                             <option value="">-- Choisir un utilisateur --</option>
                             @foreach($allUsers as $user)
-                                <option value="{{ $user->id }}">{{ $user->first_name }} {{ $user->last_name }}</option>
+                                <option value="{{ $user->id }}">{{ $user->matricule }} : {{ $user->last_name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -201,75 +201,129 @@
         @endif
 
         <!-- Conteneur de la table, rendue responsive pour un bon affichage sur mobile -->
-        <div class="table-responsive shadow rounded p-3 bg-white">
-            <!-- Tableau stylisé avec Bootstrap -->
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th scope="col">ID</th>
-                        <th scope="col">Titre</th>
-                        <th scope="col">Créé le</th>
-                        <th scope="col">Priorité</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Boucle sur chaque ticket -->
-                    @forelse($tickets as $ticket)
-                        <tr>
-                            <td>{{ $ticket->id }}</td>
-                            <td>
-                                <span class="fw-bold">{{  $ticket->title }}</span>
-                                <div class="small text-gray">Catégorie : {{  $ticket->category }}</div>
-                            </td>
-                            <td>
-                                <span class="fw-bold">{{ $ticket->created_at->format('d M Y H:i:s') }}</span>
-                                <div class="small text-gray">Par : {{ $ticket->user->first_name }} / {{ $ticket->user->branch->name ?? 'Non affecté' }}</div>
-                            </td>
-                            <td>
-                                <!-- Badge de couleur selon la priorité -->
-                                <span class="badge 
-                                    {{ $ticket->priority === 'très urgent' ? 'bg-danger' : ($ticket->priority === 'normal' ? 'bg-success' : 'bg-warning text-dark') }}">
-                                    {{ ucfirst($ticket->priority) }}
-                                </span>
-                            </td>
-                            <td>
-                                <!-- Badge de couleur selon le statut -->
-                                <span class="badge 
-                                    {{ $ticket->status === 'open' ? 'bg-success' : 'bg-tertiary' }}">
-                                    {{ ucfirst($ticket->status) }}
-                                </span>
-                            </td>
-                            <td>
-    <!-- Bouton pour voir le ticket -->
-    <button class="btn btn-sm btn-outline-info me-1" wire:click="show({{ $ticket->id }})" title="Voir le ticket">
-        <i class="bi bi-eye"></i> {{-- Icône œil Bootstrap Icons --}}
-    </button>
-
-    <!-- Bouton pour supprimer le ticket avec confirmation -->
-    <button class="btn btn-sm btn-outline-danger" 
-            wire:click="delete({{ $ticket->id }})" 
-            onclick="return confirm('Confirmer la suppression ?')" 
-            title="Supprimer le ticket">
-        <i class="bi bi-trash"></i> {{-- Icône poubelle Bootstrap Icons --}}
-    </button>
-</td>
-
-                        </tr>
-                    @empty
-                        <!-- Message si aucun ticket -->
-                        <tr>
-                            <td colspan="7" class="text-center text-muted">Aucun ticket trouvé.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-
         <div>
-            {{ $tickets->links() }}
+            <div class="table-responsive shadow rounded p-3 bg-white">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Titre</th>
+                            <th>Créé par</th>
+                            <th>Avancement</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($tickets as $ticket)
+                            <tr>
+                                <td>{{ $ticket->id }}</td>
+                                <td>
+                                    <span class="fw-bold">{{ $ticket->title }}</span><br>
+                                    <small class="text-muted">
+                                        <span class="badge bg-light text-muted border">
+                                            <i class="fas fa-tag me-1"></i> {{ $ticket->category }}
+                                        </span>
+                                        <span class="badge bg-light text-muted border">
+                                          <i class="fas fa-exclamation me-1"></i> {{ $ticket->priority }}
+                                        </span>
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img 
+                                            src="{{ $ticket->user->profile_photo_path 
+                                                ? asset('storage/' . $ticket->user->profile_photo_path)
+                                                : asset('assets/img/team/avatar.jpg') }}" 
+                                            class="avatar rounded-circle me-2" width="40" height="40">
+                                        <div>
+                                            <div>{{ $ticket->user->first_name }} {{ $ticket->user->last_name }}</div>
+                                            <small class="text-muted">
+                                                <span class="me-1">
+                                                    <i class="fas fa-university me-1"></i> {{ $ticket->user->branch->name }}
+                                                </span>
+                                                <span class="mx-2 text-muted">|</span>
+                                                <span>
+                                                    <i class="fas fa-phone me-1"></i> {{ $ticket->user->phone }}
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </td>
+                                @php
+                                    \Carbon\Carbon::setLocale('fr');
+                                    $created = $ticket->created_at;
+                                    $daysDiff = $created->diffInDays(now());
+                                @endphp
+
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div>
+                                            <div>
+                                                <strong>Créé le :</strong> {{ $created->format('d/m/Y H:i') }}
+                                            </div>
+                                            <small class="d-block mt-1">
+                                                <i class="fas fa-clock me-1 text-muted"></i>
+                                                @if ($daysDiff > 7)
+                                                    <span class="badge bg-danger">Ancien : {{ $daysDiff }} jours</span>
+                                                @else
+                                                    <span>{{ $created->diffForHumans() }}</span>
+                                                @endif
+                                            </small>
+                                        </div>
+                                    </div>
+                                </td>
+
+
+                               <td>
+                                    <span class="badge 
+                                        {{ $ticket->status === 'open' ? 'bg-success' : 
+                                        ($ticket->status === 'in_progress' ? 'bg-warning text-dark' : 'bg-secondary') }}">
+                                        {{ ucfirst(str_replace('_', ' ', $ticket->status)) }}
+                                    </span><br>
+                                    <small class="text-muted">
+                                        <i class="fas fa-user me-1"></i> {{ $ticket->assignedTo->matricule ?? '-' }}
+                                    </small>
+                                </td>
+
+                               <td>
+                                    <button wire:click="show({{ $ticket->id }})" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+
+                                    <button onclick="Livewire.emit('confirmDelete', {{ $ticket->id }})" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+
+                                </td>
+
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">Aucun ticket trouvé.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+                <div class="card-footer px-3 border-0 d-flex flex-column flex-lg-row align-items-center justify-content-between">
+                    {{-- Infos --}}
+                    <div class="fw-normal small mt-4 mt-lg-0">
+                        Affichage de {{ $tickets->firstItem() }} à {{ $tickets->lastItem() }} sur {{ $tickets->total() }} résultats
+                    </div>
+                    {{-- Pagination --}}
+                    <div>
+                        {{ $tickets->links() }}
+                    </div>
+                </div>
+            </div>
+
+            
+
+
         </div>
+
     @endif
 </div>
+
+
+

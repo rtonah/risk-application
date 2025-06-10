@@ -6,6 +6,13 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use App\Listeners\TrackUserLogin;
+use App\Listeners\TrackUserLogout;
+
+
+
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -18,6 +25,8 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+        Login::class => [TrackUserLogin::class],
+        Logout::class => [TrackUserLogout::class],
     ];
 
     /**

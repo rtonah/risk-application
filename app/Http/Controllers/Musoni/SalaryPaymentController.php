@@ -33,7 +33,9 @@ class SalaryPaymentController extends Controller
         $this->types_paiement = get_setting('types_paiement') ?? [];
 
         // 2. Extraire l'identifiant spécifique salaire
-        $this->payement_id = $this->types_paiement['compte_pivot'] ?? null;
+        // $this->payement_id = $this->types_paiement['compte_pivot'] ?? null;
+        $this->payment_id = $this->types_paiement['compte_pivot'] ?? null;
+
 
         // 3. Récupérer les credentials CBS du mode actif (démo ou production)
         $this->env_mode = get_setting('env_mode') ?? 'demo';
@@ -97,7 +99,8 @@ class SalaryPaymentController extends Controller
 
     public function show(SalaryPayment $salaryPayment)
     {
-        return view('salary_payments.show', compact('salaryPayment'));
+        // return view('salary_payments.show', compact('salaryPayment'));
+        return view('musoni.salary_payments.show', compact('salaryPayment'));
     }
 
     public function edit(SalaryPayment $salaryPayment)
@@ -149,7 +152,6 @@ class SalaryPaymentController extends Controller
     #.. Tester la connexion CBS
     public function testConnexionCBS($login, $password)
     {
-        // dd($this->token, $this->login, $this->password);
         try {
             $response = Http::withHeaders([
                 'X-Fineract-Platform-TenantId' => 'acepmg',
@@ -239,7 +241,6 @@ class SalaryPaymentController extends Controller
             'payment_type_id' => 'required|integer',
         ]);
 
-        // dd($request->payment_type_id, $request->login, $request->password);
 
         // Tester la connexion CBS
         if (!$this->testConnexionCBS($request->login, $request->password)) {

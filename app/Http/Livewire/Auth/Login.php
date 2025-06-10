@@ -4,64 +4,48 @@ namespace App\Http\Livewire\Auth;
 
 use App\Models\User;
 use Livewire\Component;
+use Illuminate\Support\Facades\Hash;
 
 class Login extends Component
 {
-
-    public $email = '';
+    public $matricule = '';
     public $password = '';
     public $remember_me = false;
 
     protected $rules = [
-        'email' => 'required|email:rfc,dns',
+        'matricule' => 'required|string',
         'password' => 'required|min:6',
     ];
 
-    //This mounts the default credentials for the admin. Remove this section if you want to make it public.
     public function mount()
     {
         if (auth()->user()) {
             return redirect()->intended('/dashboard');
         }
         $this->fill([
-            'email' => 'admin@volt.com',
+            'matricule' => 'M1114',  // ou ce que tu souhaites comme identifiant par défaut
             'password' => 'secret',
         ]);
     }
 
-    // public function login()
-    // {
-    //     $credentials = $this->validate();
-    //     if (auth()->attempt(['email' => $this->email, 'password' => $this->password], $this->remember_me)) {
-    //         $user = User::where(['email' => $this->email])->first();
-    //         auth()->login($user, $this->remember_me);
-    //         return redirect()->intended('/dashboard');
-    //     } else {
-    //         return $this->addError('email', trans('auth.failed'));
-    //     }
-    // }
-
     public function login()
     {
-        $credentials = $this->validate();
+        $this->validate();
 
-        $user = User::where('email', $this->email)->first();
+        $user = User::where('matricule', $this->matricule)->first();
 
-        // Vérifie que l'utilisateur existe et que le mot de passe est correct
-        if ($user && \Hash::check($this->password, $user->password)) {
-            // Vérifie le statut
+        if ($user && Hash::check($this->password, $user->password)) {
             if ($user->status !== 1) {
-                return $this->addError('email', 'Votre compte est inactif. Veuillez contacter l\'administrateur.');
+                return $this->addError('matricule', 'Votre compte est inactif. Veuillez contacter l\'administrateur.');
             }
 
-            // Authentification réussie
             auth()->login($user, $this->remember_me);
+
             return redirect()->intended('/dashboard');
         }
 
-        return $this->addError('email', trans('auth.failed'));
+        return $this->addError('matricule', trans('auth.failed'));
     }
-
 
     public function render()
     {

@@ -34,7 +34,7 @@
               </path>
             </svg>
           </a>
-          <div class="dropdown-menu dropdown-menu-lg dropdown-menu-center mt-2 py-0">
+          {{-- <div class="dropdown-menu dropdown-menu-lg dropdown-menu-center mt-2 py-0">
             <div class="list-group list-group-flush">
               <a href="#" class="text-center text-primary fw-bold border-bottom border-light py-3">Notifications</a>
               <a href="#" class="list-group-item list-group-item-action border-bottom">
@@ -148,7 +148,7 @@
                 View all
               </a>
             </div>
-          </div>
+          </div> --}}
         </li>
         <li class="nav-item dropdown ms-lg-3">
           <a class="nav-link dropdown-toggle pt-1 px-0" href="#" role="button" data-bs-toggle="dropdown"

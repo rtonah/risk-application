@@ -6,15 +6,15 @@ use App\Models\Branch;
 use Livewire\Component;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
+use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 
 class UserManagement extends Component
 {
+    use WithPagination;
     use WithFileUploads;
 
-    public $users;
-    public $roles;
-    public $branches;
+    public $roles, $branches;
     
     public $selectedRole = '';
     public $selectedStatus = '';
@@ -33,92 +33,57 @@ class UserManagement extends Component
     public $selectedUserIdForPasswordReset = null;
     public $newPassword = '';
 
+    protected $paginationTheme = 'bootstrap'; // Ou 'tailwind' selon ton interface
 
-    #.. Réinitialisation UserManagement
     public function mount()
     {
-
         $this->roles = Role::all();
-        $this->branches = Branch::all(); // ⚠️ Assure-toi que le modèle Branch existe
-        $this->loadUsers();
+        $this->branches = Branch::all();
     }
 
-    #.. Fonction filtre
     public function updatedSelectedRole()
     {
-        $this->loadUsers();
+        $this->resetPage();
     }
 
     public function updatedSelectedStatus()
     {
-        $this->loadUsers();
+        $this->resetPage();
     }
 
     public function updatedSelectedBranch()
     {
-        $this->loadUsers();
+        $this->resetPage();
     }
 
     public function updatedSearch()
     {
-        $this->loadUsers();
+        $this->resetPage();
     }
 
-    #.. Affichage des utilisateurs
-    public function loadUsers()
-    {
-        $query = User::with(['roles', 'branch']);
-
-        if ($this->selectedRole) {
-            $query->whereHas('roles', fn($q) => $q->where('name', $this->selectedRole));
-        }
-
-        if ($this->selectedStatus !== '') {
-            $query->where('status', $this->selectedStatus);
-        }
-        if ($this->selectedBranch !== '') {
-            $query->where('branch_id', $this->selectedBranch);
-        }
-
-        if (!empty($this->search)) {
-            $query->where(function ($q) {
-                $q->where('first_name', 'like', "%{$this->search}%")
-                  ->orWhere('last_name', 'like', "%{$this->search}%")
-                  ->orWhere('email', 'like', "%{$this->search}%");
-            });
-        }
-
-        $this->users = $query->get();
-    }
-
-    #.. Modification rôle
     public function changeUserRole($userId, $newRole)
     {
         $user = User::findOrFail($userId);
         $user->syncRoles([$newRole]);
-        $this->mount(); // Refresh data
 
         $this->dispatchBrowserEvent('notify', [
             'type' => 'success',
             'message' => 'Rôle mis à jour.'
         ]);
-
     }
 
-    #.. Modification statut
     public function toggleStatus($userId)
     {
         $user = User::findOrFail($userId);
         $user->status = !$user->status;
         $user->save();
-        $this->mount();
+
         $this->dispatchBrowserEvent('notify', [
             'type' => 'success',
             'message' => 'Statut utilisateur mis à jour.'
         ]);
     }
 
-    #.. Création utilisateur
     public function createUser()
     {
         $this->validate([
@@ -144,11 +109,10 @@ class UserManagement extends Component
         }
 
         $user->save();
-
         $user->assignRole($this->newUser['role']);
 
         $this->reset(['showCreateModal', 'newUser', 'photo']);
-        $this->mount();
+        $this->resetPage();
 
         $this->dispatchBrowserEvent('notify', [
             'type' => 'success',
@@ -156,7 +120,6 @@ class UserManagement extends Component
         ]);
     }
 
-    #.. Modal de réinitialisation
     public function openPasswordResetModal($userId)
     {
         $this->selectedUserIdForPasswordReset = $userId;
@@ -164,7 +127,6 @@ class UserManagement extends Component
         $this->dispatchBrowserEvent('showPasswordModal');
     }
 
-    #.. Reset Password
     public function resetPassword()
     {
         $this->validate([
@@ -184,9 +146,32 @@ class UserManagement extends Component
         ]);
     }
 
-
     public function render()
     {
-        return view('livewire.admin.user-management');
+        $query = User::with(['roles', 'branch']);
+
+        if ($this->selectedRole) {
+            $query->whereHas('roles', fn($q) => $q->where('name', $this->selectedRole));
+        }
+
+        if ($this->selectedStatus !== '') {
+            $query->where('status', $this->selectedStatus);
+        }
+
+        if ($this->selectedBranch !== '') {
+            $query->where('branch_id', $this->selectedBranch);
+        }
+
+        if (!empty($this->search)) {
+            $query->where(function ($q) {
+                $q->where('first_name', 'like', "%{$this->search}%")
+                    ->orWhere('last_name', 'like', "%{$this->search}%")
+                    ->orWhere('email', 'like', "%{$this->search}%");
+            });
+        }
+
+        return view('livewire.admin.user-management', [
+            'users' => $query->paginate(5),
+        ]);
     }
 }

@@ -6,16 +6,17 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\incidence\ItRequest;
 use App\Models\User;
-use App\Models\incidence\ItRequestComment;
+
 
 class ItRequestList extends Component
 {
     use WithPagination;
 
+    protected $paginationTheme = 'bootstrap';
+
     public $showTicket = false;
     public $selectedTicket = null;
 
-    // Filtres
     public $search = '';
     public $filterStatus = null;
     public $filterCategory = '';
@@ -25,15 +26,16 @@ class ItRequestList extends Component
     public $categories = ['Musoni', 'Odoo', 'Informatique', 'SIM Flotte', 'Mobile Banking'];
     public $priorities = ['normal', 'urgent', 'très urgent'];
 
-    public $allUsers = []; // ✅ à ajouter
-
-    protected $updatesQueryString = ['search', 'filterStatus', 'filterCategory', 'filterPriority'];
-    protected $paginationTheme = 'bootstrap';
-
-    // Formulaire de mise à jour
     public $newStatus;
     public $assignedUserId;
     public $commentContent;
+
+    public $allUsers = [];
+
+    #.. Variable pour la suppression
+    protected $listeners = ['confirmDelete', 'deleteConfirmed'];
+
+    protected $queryString = ['search', 'filterStatus', 'filterCategory', 'filterPriority'];
 
     public function updatingSearch() { $this->resetPage(); }
     public function updatingFilterStatus() { $this->resetPage(); }
@@ -42,23 +44,18 @@ class ItRequestList extends Component
 
     public function mount()
     {
-        $this->resetForm();
-        $this->allUsers = User::orderBy('first_name')->get();
+        $this->allUsers = User::whereHas('roles', function($query) {
+            $query->where('name', 'Informaticien')
+                ->orWhere('name', 'admin');
+        })->orderBy('first_name')->get();
     }
 
-    public function resetForm()
-    {
-        $this->newStatus = null;
-        $this->assignedUserId = null;
-        $this->commentContent = '';
-    }
 
     public function show($id)
     {
         $this->selectedTicket = ItRequest::with(['user', 'assignedTo', 'comments.user'])->findOrFail($id);
         $this->newStatus = $this->selectedTicket->status;
         $this->assignedUserId = $this->selectedTicket->assigned_to;
-        $this->commentContent = '';
         $this->showTicket = true;
     }
 
@@ -66,22 +63,33 @@ class ItRequestList extends Component
     {
         $this->showTicket = false;
         $this->selectedTicket = null;
-        $this->resetForm();
     }
 
-    public function delete($id)
+    /**
+     * Affiche la popup de confirmation via JS
+     */
+    public function confirmDelete($id)
     {
-        $ticket = ItRequest::findOrFail($id);
-        $ticket->delete();
+        $this->dispatchBrowserEvent('show-delete-confirmation', ['id' => $id]);
+    }
+
+    /**
+     * Supprime le ticket si la confirmation a été validée
+     */
+    public function deleteConfirmed($id)
+    {
+        \App\Models\Incidence\ItRequest::findOrFail($id)->delete();
+
         session()->flash('message', "Ticket #$id supprimé.");
+
         $this->resetPage();
 
-        if ($this->showTicket && $this->selectedTicket && $this->selectedTicket->id == $id) {
+        if ($this->selectedTicket && $this->selectedTicket->id == $id) {
             $this->backToList();
         }
     }
 
-    public function updateTicket()
+     public function updateTicket()
     {
         $this->validate([
             'newStatus' => 'required|in:open,in_progress,closed', // ✅ corrigé
@@ -124,14 +132,14 @@ class ItRequestList extends Component
 
     public function render()
     {
-        $query = ItRequest::query()->with(['user', 'assignedTo']);
+        $query = ItRequest::with(['user', 'assignedTo']);
 
         if ($this->search) {
-            $query->where(function($q) {
-                $q->where('title', 'like', '%'.$this->search.'%')
-                  ->orWhereHas('user', function($q2) {
-                      $q2->where('first_name', 'like', '%'.$this->search.'%')
-                         ->orWhere('last_name', 'like', '%'.$this->search.'%');
+            $query->where(function ($q) {
+                $q->where('title', 'like', '%' . $this->search . '%')
+                  ->orWhereHas('user', function ($subQuery) {
+                      $subQuery->where('first_name', 'like', '%' . $this->search . '%')
+                               ->orWhere('last_name', 'like', '%' . $this->search . '%');
                   });
             });
         }
@@ -150,8 +158,6 @@ class ItRequestList extends Component
 
         $tickets = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return view('livewire.incidence.it-request-list', [
-            'tickets' => $tickets,
-        ]);
+        return view('livewire.incidence.it-request-list', compact('tickets'));
     }
 }

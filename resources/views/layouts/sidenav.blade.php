@@ -97,34 +97,37 @@
 
                     <div class="multi-level collapse {{ Request::is('incidents*') ? 'show' : '' }}" id="submenu-incidents">
                         <ul class="flex-column nav">
+                            @can('update_incidents')
+                                {{-- IT Dashcboards --}}
+                                <li class="nav-item {{ Request::is('incidents/dashboard') ? 'active' : '' }}">
+                                    <a class="nav-link" href="{{ route('incidents.dashboard') }}">
+                                        <span class="sidebar-text">Dashboard IT</span>
+                                    </a>
+                                </li>
+                            
                                 {{-- Lien vers la liste --}}
                                 <li class="nav-item {{ Request::is('incidents') ? 'active' : '' }}">
                                     <a class="nav-link" href="{{ route('incidents.index') }}">
                                         <span class="sidebar-text">Liste des incidents</span>
                                     </a>
                                 </li>
-                            @can('update_incidents')
-                                {{-- Lien vers création --}}
-                                <li class="nav-item {{ Request::is('incidents/create') ? 'active' : '' }}">
-                                    <a class="nav-link" href="{{ route('incidents.create') }}">
-                                        <span class="sidebar-text">Ajouter un incident</span>
-                                    </a>
-                                </li>
                             @endcan
-
+                            {{-- Lien vers création --}}
+                            <li class="nav-item {{ Request::is('incidents/create') ? 'active' : '' }}">
+                                <a class="nav-link" href="{{ route('incidents.create') }}">
+                                    <span class="sidebar-text">Ajouter un incident</span>
+                                </a>
+                            </li>
                             {{-- Lien vers recherche ou rapports --}}
-                            <li class="nav-item {{ Request::is('incidents/search') ? 'active' : '' }}">
+                            {{-- <li class="nav-item {{ Request::is('incidents/search') ? 'active' : '' }}">
                                 <a class="nav-link" href="{{ route('incidents.search') }}">
                                     <span class="sidebar-text">Recherche</span>
                                 </a>
-                            </li>
+                            </li> --}}
                             
-                             {{-- IT Dashcboards --}}
-                            <li class="nav-item {{ Request::is('incidents/dashboard') ? 'active' : '' }}">
-                                <a class="nav-link" href="{{ route('incidents.dashboard') }}">
-                                    <span class="sidebar-text">Dashboard IT</span>
-                                </a>
-                            </li>
+                           
+
+                            
                         </ul>
                     </div>
                 </li>
@@ -172,6 +175,55 @@
                     </div>
                 </li>
             @endcan
+
+            {{-- Menu Risque Opérationnel --}}
+            <li class="nav-item">
+                <span
+                    class="nav-link {{ Request::is('risque*') ? '' : 'collapsed' }} d-flex justify-content-between align-items-center"
+                    data-bs-toggle="collapse" data-bs-target="#submenu-risque">
+                    <span>
+                        <span class="sidebar-icon">
+                            <!-- Icône pour Risque -->
+                            <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd"
+                                    d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 12H9v-2h2v2zm0-4H9V6h2v4z"
+                                    clip-rule="evenodd"/>
+                            </svg>
+                        </span>
+                        <span class="sidebar-text">Risque Opérationnel</span>
+                    </span>
+                    <span class="link-arrow">
+                        <svg class="icon icon-sm" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                    </span>
+                </span>
+
+                <div class="multi-level collapse {{ Request::is('risque*') ? 'show' : '' }}" id="submenu-risque">
+                    <ul class="flex-column nav">
+                        <li class="nav-item {{ Request::is('risque') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('risque.index') }}">
+                                <span class="sidebar-text">Liste incidents</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="multi-level collapse {{ Request::is('risque*') ? 'show' : '' }}" id="submenu-risque">
+                    <ul class="flex-column nav">
+                        <li class="nav-item {{ Request::is('risque/create') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('risque.create') }}">
+                                <span class="sidebar-text">Créer un incident</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+
             {{-- Menu réclamation --}}
             @can('create_claim')
                 <li class="nav-item">
@@ -230,6 +282,7 @@
                 </li>
             @endcan
 
+            {{-- Menu Vérification delai de Grace --}}
             @can('verify_grace_period')
                 <li class="nav-item">
                     <span
@@ -256,17 +309,23 @@
                     </span>
 
                     <div class="multi-level collapse {{ Request::is('musoni*') ? 'show' : '' }}" id="submenu-musoni">
-                      <ul class="flex-column nav">
-                        <li class="nav-item {{ Request::is('musoni_grace*') ? 'active' : '' }}">
-                          <a class="nav-link" href="{{ route('grace.index') }}">
-                            <span class="sidebar-text">Vérification grace</span>
-                          </a>
-                        </li>
+                        <ul class="flex-column nav">
+                            <li class="nav-item {{ Request::is('musoni_grace*') && !Request::is('musoni_grace/dashboard') ? 'active' : '' }}">
+                                <a class="nav-link" href="{{ route('grace.index') }}">
+                                    <span class="sidebar-text">Vérification grace</span>
+                                </a>
+                            </li>
 
-                        <!-- Nouveau sous-menu Virement -->
-                        
-                      </ul>
+                            <li class="nav-item {{ Request::is('musoni_grace/dashboard') ? 'active' : '' }}">
+                                <a class="nav-link" href="{{ route('grace.dashboard') }}">
+                                    <span class="sidebar-text">Tableau de bord</span>
+                                </a>
+                            </li>
+
+                            <!-- Nouveau sous-menu Virement ici si nécessaire -->
+                        </ul>
                     </div>
+
                 </li>
             @endcan
 

@@ -10,4 +10,8 @@ class GraceController extends Controller
     public function index(Request $request) {
         return view('musoni.grace.index');
     }
+
+    public function dashboard(Request $request) {
+        return view('musoni.grace.dashboard');
+    }
 }

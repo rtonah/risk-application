@@ -4,6 +4,7 @@ namespace App\Http\Livewire\Incidence;
 
 use Livewire\Component;
 use App\Models\Incidence\ItRequest;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class IncidenceDashboard extends Component
@@ -13,6 +14,7 @@ class IncidenceDashboard extends Component
     public $ticketsByCategory;
     public $ticketStats;
     public $technicianKpiChart;
+    public $ticketStatusChart;
 
     public function mount()
     {
@@ -21,69 +23,89 @@ class IncidenceDashboard extends Component
 
     public function loadData()
     {
+        // 🎫 Tickets récents
         $this->recentTickets = ItRequest::latest()->take(10)->get();
 
-        $this->ticketsByDate = ItRequest::select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as total'))
+        // 📅 Tickets par date (7 derniers jours)
+        $this->ticketsByDate = ItRequest::whereDate('created_at', '>=', now()->subDays(6))
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as total'))
             ->groupBy('date')
             ->orderBy('date')
-            ->get()
             ->pluck('total', 'date');
 
+        // 📂 Tickets par catégorie
         $this->ticketsByCategory = ItRequest::select('category', DB::raw('count(*) as total'))
             ->groupBy('category')
-            ->get()
             ->pluck('total', 'category');
 
+        // 📊 Statistiques simples
         $this->ticketStats = [
             [
-                'label' => 'Tickets Ouverts',
+                'label' => 'Tickets ouverts',
                 'count' => ItRequest::where('status', 'open')->count(),
+                'color' => 'success',
                 'icon'  => 'open.png',
-                'color' => 'success',
             ],
             [
-                'label' => 'Tickets en Cours',
+                'label' => 'Tickets en cours',
                 'count' => ItRequest::where('status', 'in_progress')->count(),
-                'icon'  => 'progress.png',
                 'color' => 'success',
+                'icon'  => 'progress.png',
             ],
             [
-                'label' => 'Tickets Traités',
+                'label' => 'Tickets clôturés',
                 'count' => ItRequest::where('status', 'closed')->count(),
-                'icon'  => 'done.png',
                 'color' => 'success',
+                'icon'  => 'closed.png',
             ],
         ];
 
-        $kpiRaw = ItRequest::with('technician')
-            ->select('assigned_to', DB::raw('COUNT(*) as total'))
-            ->where('status', 'closed')
-            ->groupBy('assigned_to')
-            ->get();
+        // 👷‍♂️ Performance par technicien
+        $technicians = ItRequest::select('assigned_to')
+            ->whereNotNull('assigned_to')
+            ->distinct()
+            ->pluck('assigned_to');
 
         $labels = [];
-        $data = [];
+        $assignedCounts = [];
+        $closedCounts = [];
 
-        foreach ($kpiRaw as $item) {
-            $name = $item->technician->last_name ?? 'Non assigné';
-            $labels[] = $name;
-            $data[] = $item->total;
+        foreach ($technicians as $tech) {
+            $user = User::find($tech);
+            $labels[] = $user ? $user->matricule : "ID #$techId";
+            $assignedCounts[] = ItRequest::where('assigned_to', $tech)->count();
+            $closedCounts[] = ItRequest::where('assigned_to', $tech)->where('status', 'closed')->count();
         }
 
         $this->technicianKpiChart = [
             'labels' => $labels,
-            'data' => $data,
+            'datasets' => [
+                [
+                    'label' => 'Assignés',
+                    'data' => $assignedCounts,
+                    'backgroundColor' => '#60A5FA'
+                ],
+                [
+                    'label' => 'Clôturés',
+                    'data' => $closedCounts,
+                    'backgroundColor' => '#34D399'
+                ]
+            ]
+        ];
+
+        // 📈 Répartition par statut
+        $this->ticketStatusChart = [
+            'labels' => ['Ouvert', 'En cours', 'Clôturé'],
+            'data' => [
+                ItRequest::where('status', 'open')->count(),
+                ItRequest::where('status', 'in_progress')->count(),
+                ItRequest::where('status', 'closed')->count()
+            ]
         ];
     }
 
     public function render()
     {
-        return view('livewire.incidence.incidence-dashboard', [
-            'recentTickets' => $this->recentTickets,
-            'ticketsByDate' => $this->ticketsByDate,
-            'ticketsByCategory' => $this->ticketsByCategory,
-            'ticketStats' => $this->ticketStats,
-            'technicianKpiChart' => $this->technicianKpiChart,
-        ]);
+        return view('livewire.incidence.incidence-dashboard');
     }
 }

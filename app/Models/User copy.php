@@ -78,10 +78,5 @@ class User extends Authenticatable
         return $this->belongsTo(Branch::class);
     }
 
-    // Nouvelle relation pour les activités
-    public function incidentActivities()
-    {
-        return $this->hasMany(IncidentActivity::class);
-    }
 
 }

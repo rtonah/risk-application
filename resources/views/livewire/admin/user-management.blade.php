@@ -1,8 +1,8 @@
 <div>
     <div class="table-settings mb-4">
         <div class="row justify-content-between align-items-center">
-            <div class="col-9 col-lg-8 d-md-flex">
-                <div class="input-group me-2 me-lg-3 fmxw-300">
+            <div class="col-9 col-lg-10 d-md-flex">
+                <div class="input-group me-2 me-lg-3 fmxw-400">
                     <span class="input-group-text">
                         <svg class="icon icon-xs" x-description="Heroicon name: solid/search"
                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -37,7 +37,7 @@
                 </select>
                 
             </div>
-            <div class="col-3 col-lg-4 d-flex justify-content-end">
+            <div class="col-3 col-lg-2 d-flex justify-content-end">
                 <div class="btn-group">
                     {{-- <button wire:click="$set('showCreateModal', true)" class="btn btn-primary mb-3">Créer un utilisateur</button> --}}
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
@@ -58,7 +58,7 @@
 
                     <th>Name</th>
                     <th>Role</th>
-                    <th>Date Created</th>
+                    <th>Contact</th>
                     <th>Status</th>
                     <th>Change Role</th>
                     <th>Action</th>
@@ -84,14 +84,25 @@
                             <span class="fw-bold">{{ $user->roles->pluck('name')->first() ?? 'None' }}</span>
                             <div class="small text-gray">Agence : {{ $user->branch->name ?? 'Non affecté' }}</div>
                         </td>
-                        <td>{{ $user->created_at->translatedFormat('d F Y') }}</td>
                         <td>
+                             <span class="fw-bold"> {{ $user->phone }} </span>
+                            <div class="small text-gray">Matricule : {{ $user->matricule ?? 'Non affecté' }}</div>
+                        </td>
+                       <td class="text-center">
                             @if ($user->status === 1)
-                                <span class="badge bg-success">Active</span>
+                                <span class="d-inline-block rounded-circle shadow" 
+                                    style="width: 17px; height: 17px; background-color: #28a745;" 
+                                    title="Actif">
+                                </span>
                             @else
-                                <span class="badge bg-danger">Inactive</span>
+                                <span class="d-inline-block rounded-circle shadow" 
+                                    style="width: 17px; height: 17px; background-color: #dc3545;" 
+                                    title="Inactif">
+                                </span>
                             @endif
                         </td>
+
+
                         <td>
                         <select wire:change="changeUserRole({{ $user->id }}, $event.target.value)" class="form-select form-select-sm" style="max-width: 200px;">
                                 @foreach ($roles as $role)
@@ -124,6 +135,16 @@
                 @endforeach
             </tbody>
         </table>
+        <div class="card-footer px-3 border-0 d-flex flex-column flex-lg-row align-items-center justify-content-between">
+            {{-- Infos --}}
+            <div class="fw-normal small mt-4 mt-lg-0">
+                Affichage de {{ $users->firstItem() }} à {{ $users->lastItem() }} sur {{ $users->total() }} résultats
+            </div>
+            {{-- Pagination --}}
+            <div class="d-flex justify-content-center">
+                {{ $users->links('vendor.pagination.bootstrap-5-sm') }}
+            </div>
+        </div>
         {{-- ✅ Script pour success alert --}}
 
         <script>
@@ -174,7 +195,7 @@
                         @endforeach
                     </select>
 
-                    <label for="newPassword" class="form-label">Photo de profil</label>
+                    <label for="photo" class="form-label">Photo de profil</label>
                     <input type="file" wire:model="photo" class="form-control mb-2">
                     @if ($photo)
                         <img src="{{ $photo->temporaryUrl() }}" width="100" class="mt-2">
